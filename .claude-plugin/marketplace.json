@@ -1,0 +1,179 @@
+{
+  "name": "agent-tooling",
+  "owner": {
+    "name": "Sure Serverman",
+    "email": "holyfiremin@gmail.com"
+  },
+  "metadata": {
+    "description": "Authoring kits for AI coding-agent platforms \u2014 a seven-plugin family built around plugin-dev (Claude Code authoring + the shared cross-host determinism kit) plus one sibling per platform (cowork-dev, cursor-dev, codex-dev, opencode-dev, hermes-dev, openclaw-dev). Each sibling owns its platform's half of extension development, ships skills grounded in June-2026 platform docs, and vendors plugin-dev's deterministic validation lane.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "plugin-dev",
+      "source": "./plugin-dev",
+      "description": "Lean, security-aware authoring kit for Claude Code plugins and the shared cross-host core of the platform-authoring family (cowork-dev, cursor-dev, codex-dev, opencode-dev, hermes-dev, openclaw-dev), with a balanced deterministic/LLM split: a deterministic bash validation suite (validate-plugin.sh orchestrating per-domain validators on a shared JSON finding contract) plus scaffolders own mechanical structure and checks, while the LLM lane owns judgment (leak/injection review, triggering, design). The boundary is portable: install-kit.sh + scaffold-validator.sh vendor a self-contained deterministic lane into ANY plugin, the determinism-boundary skill teaches the split, and create-plugin / refactor-plugin make new and existing plugins balanced like plugin-dev itself. Skills for plugin structure / skill / command / agent / hook / MCP authoring, cross-host subagent scaffolding (Claude Code, Codex, Cursor, OpenCode), leak-audit and best-practices-sync passes, plus skill-workshop which mines session JSONL history (via the session-analyzer Haiku subagent) for skill candidates; agents for validation, skill review, agent generation, and session mining. Current to June 2026: 32 hook events, five handler types, userConfig/channels/dependencies manifest fields, monitors/bin/LSP surfaces.",
+      "version": "0.7.0",
+      "category": "development",
+      "tags": [
+        "claude-code",
+        "plugin",
+        "meta",
+        "skills",
+        "agents",
+        "hooks",
+        "mcp",
+        "marketplace",
+        "scaffolding",
+        "validation",
+        "deterministic",
+        "determinism-kit",
+        "refactor",
+        "leak-audit",
+        "best-practices",
+        "cross-host",
+        "codex",
+        "cursor",
+        "opencode",
+        "skill-workshop",
+        "session-mining"
+      ],
+      "strict": false
+    },
+    {
+      "name": "cowork-dev",
+      "source": "./cowork-dev",
+      "description": "Authoring kit for Claude Cowork plugins, current as of June 2026. Owns the Cowork-specific half of plugin development: the four install paths (Anthropic catalog, direct ZIP upload, marketplace by URL, org private marketplaces) with their real limits (200 MB / 5,000 files per plugin, 50 MB manual ZIP, npm/pip marketplace sources unsupported, reserved-name list), component support (skills surface in Cowork + Claude chat; hooks and sub-agents run only in Cowork; connectors via Anthropic's cloud \u2014 local stdio MCP is NOT supported), org distribution states (Required / Installed by default / Available / Not available), and chat-native design patterns (multilingual skill triggers, connector-aware enrichment, privacy posture for cloud Routines, refuse-without-prerequisites, save-and-resume). Ships a deterministic lane: validate-cowork-artifact.sh checks a Cowork-bound plugin package for name/reserved-name violations, package-size and file-count limits, npm/pip marketplace sources, and stdio MCP servers, on the shared JSON finding contract.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": [
+        "claude-cowork",
+        "cowork",
+        "plugin",
+        "skills",
+        "connectors",
+        "hooks",
+        "zip-upload",
+        "private-marketplace",
+        "github-sync",
+        "marketplace",
+        "packaging",
+        "validation",
+        "multilingual"
+      ],
+      "strict": false
+    },
+    {
+      "name": "cursor-dev",
+      "source": "./cursor-dev",
+      "description": "Authoring kit for Cursor (the AI editor) extensions, current as of June 2026, Cursor 3.7. Owns the Cursor-specific half of extension development: plugins (.cursor-plugin/plugin.json manifest, marketplace.json multi-plugin repos, cursor.com/marketplace publishing with its open-source requirement, Team Marketplaces from private GitHub repos), rules (.cursor/rules/*.mdc only \u2014 plain .md is silently ignored \u2014 with the four application types and Team > Project > User precedence), skills (agentskills.io standard with Cursor's extra discovery paths including legacy .claude/skills/ and .codex/skills/, the paths glob-visibility key, disable-model-invocation, and the commands-to-skills migration), hooks (~22 camelCase events in hooks.json with version field, prompt-type LLM hooks, permission allow/deny/ask protocol \u2014 deliberately NOT Claude Code's schema), subagents (.cursor/agents/ plus .claude/.codex compat reads, no tools field), and MCP (mcp.json transports, OAuth, ${env:NAME} interpolation, install deeplinks, permissions.json). Ships a deterministic lane: validate-cursor-artifact.sh checks a Cursor-bound artifact directory for manifest validity, .mdc frontmatter parse and rule-type combos, ignored plain-.md rules, skill name/directory mismatches, and unknown hook event names, on the shared JSON finding contract.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": [
+        "cursor",
+        "plugin",
+        "rules",
+        "mdc",
+        "skills",
+        "subagents",
+        "hooks",
+        "mcp",
+        "marketplace",
+        "team-marketplace",
+        "agentskills",
+        "validation"
+      ],
+      "strict": false
+    },
+    {
+      "name": "codex-dev",
+      "source": "./codex-dev",
+      "description": "Authoring kit for OpenAI Codex (CLI + IDE extension) extensions, current as of June 2026, Codex CLI v0.139. Owns the Codex-specific half of extension development: plugins (.codex-plugin/plugin.json manifest, skills + hooks + MCP + app bundling, repo and personal marketplaces under .agents/plugins/, codex marketplace add, curated first-party plugins), skills (agentskills.io SKILL.md plus the Codex-only agents/openai.yaml sidecar, the five-tier discovery order, the ~2%-of-context catalog cap, custom-prompt deprecation and migration), subagents (one-TOML-per-agent custom agents with required developer_instructions, [agents] runtime limits, explicit-only spawning), config.toml (user + project layering, the v0.134.0 BREAKING removal of [profiles.*] and top-level profile= in favor of standalone overlay files, model/provider keys, approval and sandbox policies, [features], [tools], MCP server tables), the hooks engine (10 lifecycle events, hooks.json/TOML locations and precedence, exit-code and JSON output contracts, the /hooks trust model for non-managed command hooks), and AGENTS.md discovery (override files, git-root-to-cwd walk, project_doc_max_bytes). Ships a deterministic lane: validate-codex-artifact.sh checks .codex-plugin manifests and component pointers, SKILL.md frontmatter, agent TOML required fields, legacy [profiles.*]/profile= residue in config.toml (codex-legacy-profile), and hooks.json event names, on the shared JSON finding contract.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": [
+        "codex",
+        "openai",
+        "plugin",
+        "skills",
+        "subagents",
+        "hooks",
+        "config-toml",
+        "mcp",
+        "agents-md",
+        "marketplace",
+        "agentskills",
+        "validation"
+      ],
+      "strict": false
+    },
+    {
+      "name": "opencode-dev",
+      "source": "./opencode-dev",
+      "description": "Authoring kit for OpenCode (the opencode.ai terminal agent) extensions, current as of June 2026, OpenCode v1.16. Owns the OpenCode-specific half of extension development: plugins (.opencode/plugins/*.{js,ts} auto-loaded TypeScript-native via Bun, the {project, client, $, directory, worktree} hook API, ~30 hook events rebuilt on an Effect core in v1.15, npm distribution through the \"plugin\" config key), custom tools (.opencode/tools/<name>.ts with tool() from @opencode-ai/plugin, filename-derived names, built-in shadowing), agents (markdown frontmatter or opencode.json, primary/subagent/all modes, the tools-to-permission deprecation with bash glob maps), commands ($ARGUMENTS/$1..$3 templates, !`cmd` shell injection, @file inlining), config (opencode.json $schema, the 8-layer merge order, {env:}/{file:} substitution, share replacing autoshare), native Agent Skills (.opencode/skills/ plus .claude/skills/ Claude Code compat), rules (AGENTS.md canonical, CLAUDE.md fallback, instructions array with globs and remote URLs), MCP servers (local/remote, automatic OAuth with RFC 7591 DCR, the context-bloat gotcha), and themes. Ships a deterministic lane: validate-opencode-artifact.sh checks an OpenCode-bound artifact directory for agent/command frontmatter parse, the deprecated tools: map, legacy singular directories (agent/ vs agents/), opencode.json unknown keys and the deprecated autoshare flag, plugins without exports, and skill frontmatter validity, on the shared JSON finding contract.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": [
+        "opencode",
+        "plugin",
+        "agents",
+        "commands",
+        "skills",
+        "custom-tools",
+        "npm",
+        "bun",
+        "mcp",
+        "themes",
+        "agentskills",
+        "validation"
+      ],
+      "strict": false
+    },
+    {
+      "name": "hermes-dev",
+      "source": "./hermes-dev",
+      "description": "Authoring kit for Hermes Agent (Nous Research's open-source autonomous agent harness \u2014 NOT the model family), current as of June 2026, Hermes Agent v0.16 'The Surface Release'. Owns the Hermes-specific half of extension development: skills (agentskills.io SKILL.md with the Hermes-required version field and metadata.hermes.* extras, the ~/.hermes/skills/<category>/ tree with its extra CATEGORY level, skills.external_dirs cross-tool sharing, skill bundles, hermes skills install + GitHub taps + /.well-known/skills endpoints, the install-time security scan, and machine edits via the autonomous skill_manage tool), Python plugins (plugin.yaml manifest + register(ctx) with register_tool/register_hook/register_command/register_skill, the args-dict-in/JSON-string-out/never-raise handler contract, pip entry points under hermes_agent.plugins, memory-provider and context-compression plugin types), and configuration (~/.hermes/config.yaml, SOUL.md/MEMORY.md/USER.md context files, auto-loaded .hermes.md/HERMES.md/AGENTS.md/CLAUDE.md/.cursorrules project context, mcp_servers stdio + HTTP/OAuth 2.1/mTLS wiring, hermes mcp serve, the 23-platform messaging gateway, Nous Portal's 300+ models, hermes claw migrate). Ships a deterministic lane: validate-hermes-artifact.sh checks plugin.yaml parse/fields/types, register(ctx) presence, SKILL.md frontmatter incl. the version field, metadata.hermes shape, config.yaml mcp_servers entries, and Python syntax, on the shared JSON finding contract. Hermes ships multiple minor releases per month \u2014 re-verify API specifics against current docs before shipping.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": [
+        "hermes",
+        "nous-research",
+        "plugin",
+        "skills",
+        "skill-bundles",
+        "taps",
+        "soul-md",
+        "mcp",
+        "python-plugin",
+        "clawhub",
+        "agentskills",
+        "validation"
+      ],
+      "strict": false
+    },
+    {
+      "name": "openclaw-dev",
+      "source": "./openclaw-dev",
+      "description": "Authoring kit for OpenClaw (the open-source personal AI assistant by Peter Steinberger, ex-Clawdbot/Moltbot) extensions, current as of June 2026, OpenClaw 2026.6.5. Owns the OpenClaw-specific half of extension development: AgentSkills SKILL.md skills (the single-line-JSON metadata.openclaw frontmatter block with emoji/os/always/requires gating, the six-level load precedence where same-name skills silently shadow instead of merging, session-start skill snapshots and the watcher, skills.entries config with the sandbox env-injection gotcha, Skill Workshop, ClawHub distribution via the clawhub CLI with commit-pinned installs), plugins (the DUAL manifest requirement \u2014 package.json openclaw field plus openclaw.plugin.json \u2014 definePluginEntry from focused SDK subpaths with the root barrel openclaw/plugin-sdk deprecated, api.registerTool contracts, channel plugins via defineChannelPluginEntry/createChatChannelPlugin, install via clawhub:/npm:/git:/local sources, the Gateway-restart-after-install gotcha, and the in-process trust doctrine), and automation (HOOK.md + handler.ts internal hooks with typed events, the Gateway cron scheduler with system-event/message/command payloads, /hooks webhooks with Bearer-only auth, HEARTBEAT.md periodic turns, workspace bootstrap files, and the strict-schema JSON5 openclaw.json where one unknown key prevents Gateway start). Ships a deterministic lane: validate-openclaw-artifact.sh checks dual manifests, extension pointers, root-barrel SDK imports, single-line skill metadata JSON, hook handler presence and events, and openclaw.json JSON5 parse, on the shared JSON finding contract.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": [
+        "openclaw",
+        "clawdbot",
+        "moltbot",
+        "plugin",
+        "skills",
+        "channel-plugin",
+        "hooks",
+        "cron",
+        "webhooks",
+        "heartbeat",
+        "clawhub",
+        "gateway",
+        "agentskills",
+        "validation"
+      ],
+      "strict": false
+    }
+  ]
+}

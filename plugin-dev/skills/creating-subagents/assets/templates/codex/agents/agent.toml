@@ -1,0 +1,9 @@
+name = "<AGENT_NAME>"
+description = "<One-paragraph routing blurb. Trigger phrases. Stance sentence. Use when to spawn.>"
+model = "inherit"
+sandbox_mode = "workspace-write"
+nickname_candidates = ["<NickA>", "<NickB>", "<NickC>"]
+
+developer_instructions = """
+<!-- CORE -->
+"""

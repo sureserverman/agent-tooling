@@ -1,0 +1,10 @@
+// Good fixture config: JSON5 — comments and trailing commas must parse.
+{
+  "skills": {
+    "load": { "watch": true, "watchDebounceMs": 500 },
+    "entries": {
+      "lobster-facts": { "enabled": true },
+    },
+  },
+  "cron": { "enabled": true, "maxConcurrentRuns": 2 },
+}

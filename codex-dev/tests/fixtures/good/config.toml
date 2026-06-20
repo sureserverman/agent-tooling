@@ -1,0 +1,15 @@
+# Clean post-v0.134.0 config: no [profiles.*] table, no top-level profile= key.
+model = "gpt-5.2-codex"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = false
+
+[tools]
+web_search = "cached"
+
+[mcp_servers.docs]
+command = "npx"
+args = ["-y", "@example/docs-mcp"]
+startup_timeout_sec = 10

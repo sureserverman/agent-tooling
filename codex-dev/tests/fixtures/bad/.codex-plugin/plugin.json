@@ -1,0 +1,8 @@
+{
+  "name": "bad-codex-plugin",
+  "version": "0.1.0",
+  "description": "Bad fixture: bare (non-'./') component pointer, dangling pointer, skill frontmatter missing description, agent TOML missing developer_instructions, legacy [profiles.*] + profile= in config.toml, unknown hook event — everything the validator must catch.",
+  "license": "MIT",
+  "skills": ["skills/hello", "./skills/missing"],
+  "hooks": "./hooks/hooks.json"
+}

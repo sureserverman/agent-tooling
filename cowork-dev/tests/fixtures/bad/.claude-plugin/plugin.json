@@ -1,0 +1,7 @@
+{
+  "name": "anthropic-plugins",
+  "description": "Bad fixture: reserved plugin name, a local stdio MCP server, and an npm marketplace source — every Cowork-incompatibility the validator must catch.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": ["fixture"]
+}

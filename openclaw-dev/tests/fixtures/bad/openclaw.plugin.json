@@ -1,0 +1,4 @@
+{
+  "name": "Broken",
+  "contracts": { "tools": ["broken_tool"] }
+}

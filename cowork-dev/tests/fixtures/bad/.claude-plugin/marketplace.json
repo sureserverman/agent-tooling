@@ -1,0 +1,16 @@
+{
+  "name": "bad-fixture-marketplace",
+  "owner": {
+    "name": "fixture"
+  },
+  "plugins": [
+    {
+      "name": "npm-sourced-plugin",
+      "source": {
+        "source": "npm",
+        "package": "@example/some-plugin"
+      },
+      "description": "npm sources are unsupported in Cowork org marketplaces — the validator must flag this."
+    }
+  ]
+}

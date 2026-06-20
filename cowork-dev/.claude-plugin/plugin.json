@@ -1,0 +1,36 @@
+{
+  "name": "cowork-dev",
+  "description": "Authoring kit for Claude Cowork plugins, current as of June 2026. Owns the Cowork-specific half of plugin development: the four install paths (Anthropic catalog, direct ZIP upload, marketplace by URL, org private marketplaces) with their real limits (200 MB / 5,000 files per plugin, 50 MB manual ZIP, npm/pip marketplace sources unsupported, reserved-name list), component support (skills surface in Cowork + Claude chat; hooks and sub-agents run only in Cowork; connectors via Anthropic's cloud — local stdio MCP is NOT supported), org distribution states (Required / Installed by default / Available / Not available), and chat-native design patterns (multilingual skill triggers, connector-aware enrichment, privacy posture for cloud Routines, refuse-without-prerequisites, save-and-resume). Ships a deterministic lane: validate-cowork-artifact.sh checks a Cowork-bound plugin package for name/reserved-name violations, package-size and file-count limits, npm/pip marketplace sources, and stdio MCP servers, on the shared JSON finding contract.",
+  "version": "0.1.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/cowork-plugin-development"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "claude-cowork",
+    "cowork",
+    "plugin",
+    "skills",
+    "connectors",
+    "mcp",
+    "hooks",
+    "marketplace",
+    "zip-upload",
+    "private-marketplace",
+    "github-sync",
+    "scheduled-tasks",
+    "routines",
+    "multilingual",
+    "validation",
+    "packaging"
+  ],
+  "dependencies": [
+    {
+      "name": "plugin-dev"
+    }
+  ]
+}

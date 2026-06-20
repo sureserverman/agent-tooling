@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/audit-tool-call.sh",
+            "timeout": 10,
+            "statusMessage": "Auditing tool call…"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/notify-done.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

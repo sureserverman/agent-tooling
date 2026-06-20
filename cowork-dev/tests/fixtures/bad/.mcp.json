@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "local-notes": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/notes.js"]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "cursor-dev",
+  "description": "Authoring kit for Cursor (the AI editor) extensions, current as of June 2026, Cursor 3.7. Owns the Cursor-specific half of extension development: plugins (.cursor-plugin/plugin.json manifest, marketplace.json multi-plugin repos, cursor.com/marketplace publishing with its open-source requirement, Team Marketplaces from private GitHub repos), rules (.cursor/rules/*.mdc only — plain .md is silently ignored — with the four application types and Team > Project > User precedence), skills (agentskills.io standard with Cursor's extra discovery paths including legacy .claude/skills/ and .codex/skills/, the paths glob-visibility key, disable-model-invocation, and the commands-to-skills migration), hooks (~22 camelCase events in hooks.json with version field, prompt-type LLM hooks, permission allow/deny/ask protocol — deliberately NOT Claude Code's schema), subagents (.cursor/agents/ plus .claude/.codex compat reads, no tools field), and MCP (mcp.json transports, OAuth, ${env:NAME} interpolation, install deeplinks, permissions.json). Ships a deterministic lane: validate-cursor-artifact.sh checks a Cursor-bound artifact directory for manifest validity, .mdc frontmatter parse and rule-type combos, ignored plain-.md rules, skill name/directory mismatches, and unknown hook event names, on the shared JSON finding contract.",
+  "version": "0.1.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/cursor-plugin-development",
+    "./skills/cursor-rules-and-skills",
+    "./skills/cursor-hooks-and-agents"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "cursor",
+    "cursor-plugin",
+    "cursor-marketplace",
+    "team-marketplace",
+    "rules",
+    "mdc",
+    "skills",
+    "agentskills",
+    "hooks",
+    "subagents",
+    "mcp",
+    "agents-md",
+    "cursorrules-migration",
+    "validation"
+  ],
+  "dependencies": [
+    {
+      "name": "plugin-dev"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "good-codex-plugin",
+  "version": "0.1.0",
+  "description": "Minimal valid Codex-bound plugin fixture: './'-prefixed component pointers that resolve, well-formed skill frontmatter, complete agent TOML, profile-free config.toml, known hook events.",
+  "license": "MIT",
+  "skills": ["./skills/hello"],
+  "hooks": "./hooks/hooks.json"
+}

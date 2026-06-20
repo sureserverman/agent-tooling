@@ -1,0 +1,46 @@
+{
+  "name": "plugin-dev",
+  "description": "Lean, security-aware authoring kit for Claude Code plugins and the shared cross-host core of the coder-plugins platform-authoring family, with a balanced deterministic/LLM split: a deterministic bash validation suite (scripts/validate-plugin.sh orchestrating per-domain validators that emit a shared JSON finding contract) plus scaffolders own mechanical structure and checks, while the LLM lane (skills + agents) owns judgment — leak/injection review, triggering quality, and design. The same boundary is portable: install-kit.sh + scaffold-validator.sh vendor a self-contained deterministic lane (the shared contract + a generic orchestrator + generated domain validators) into ANY plugin, the determinism-boundary skill teaches the split, and the create-plugin / refactor-plugin commands make new and existing plugins balanced like plugin-dev itself. Skills for plugin structure / skill / command / agent / hook / MCP authoring, cross-host subagent scaffolding (Claude Code, Codex, Cursor, OpenCode), leak-audit and best-practices-sync passes (the latter also auditing harness-assumption scaffolding for re-testing as models improve), plus skill-workshop which mines session JSONL history (via the session-analyzer Haiku subagent) for skill candidates; agents for validation, skill review, agent generation, and session mining. Current to June 2026: 32 hook events, five handler types, userConfig/channels/dependencies manifest fields, monitors/bin/LSP surfaces. Platform-specific authoring lives in sibling plugins: cowork-dev, cursor-dev, codex-dev, opencode-dev, hermes-dev, openclaw-dev.",
+  "version": "0.7.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/plugin-structure",
+    "./skills/determinism-boundary",
+    "./skills/skill-development",
+    "./skills/command-development",
+    "./skills/agent-development",
+    "./skills/hook-development",
+    "./skills/mcp-integration",
+    "./skills/mcp-server-development",
+    "./skills/plugin-settings",
+    "./skills/skill-description-leak-audit",
+    "./skills/skill-best-practices-sync",
+    "./skills/creating-subagents",
+    "./skills/skill-workshop"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "meta",
+    "skills",
+    "agents",
+    "hooks",
+    "mcp",
+    "marketplace",
+    "scaffolding",
+    "validation",
+    "leak-audit",
+    "best-practices",
+    "cross-host",
+    "codex",
+    "cursor",
+    "opencode",
+    "skill-workshop",
+    "session-mining",
+    "session-analyzer"
+  ]
+}

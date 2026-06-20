@@ -1,0 +1,5 @@
+# Bad fixture: version is missing (required), provides_tools is a comma-joined
+# scalar instead of a YAML list.
+name: broken
+description: A plugin fixture missing its version, with scalar provides_tools.
+provides_tools: get_weather, get_forecast

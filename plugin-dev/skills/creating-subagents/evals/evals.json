@@ -1,0 +1,23 @@
+{
+  "skill_name": "creating-subagents",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to create a testing-expert subagent that works in both Claude Code and Cursor. It should triage test failures and write new tests. Can you help me scaffold this?",
+      "expected_output": "Skill triggers. Interview begins with name + purpose + 7 items. Scaffold written to cwd/testing-expert/ with claude-code/ and cursor/ host files.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Port this Claude Code agent file to Codex CLI and OpenCode — same behavior, same description, just the right frontmatter for each host.",
+      "expected_output": "Skill triggers. Reads source agent. Produces codex/agents/<name>.toml and opencode/<name>.md with equivalent semantics, not a copy-paste.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Update my claude settings to allow npm commands without prompting.",
+      "expected_output": "Skill does NOT trigger. This is a settings/permissions request, not a subagent-creation request — routing should go to update-config or similar.",
+      "files": []
+    }
+  ]
+}

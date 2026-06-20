@@ -1,0 +1,4 @@
+{
+  "name": "bad-cursor-plugin",
+  "description": "Bad fixture: a plain .md rule (silently ignored), a broken-YAML .mdc, a skill whose frontmatter name mismatches its directory, and a hooks.json with a PascalCase event and no version — every Cursor incompatibility the validator must catch."
+}

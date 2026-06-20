@@ -1,0 +1,5 @@
+{
+  "name": "good-cursor-plugin",
+  "description": "Minimal valid Cursor-bound plugin fixture: manifest with a name, one well-formed .mdc rule, one skill whose name matches its directory, and a hooks.json with integer version and known camelCase events.",
+  "version": "0.1.0"
+}

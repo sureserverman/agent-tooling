@@ -1,0 +1,127 @@
+# Copy-paste-ready GitHub Actions release workflow for a multi-plugin marketplace.
+#
+# Save this file as .github/workflows/release.yml in your plugin repo. On every
+# tag push matching v* (v0.1.0, v1.2.3, etc.), it builds one inner zip per
+# plugin under plugins/*, wraps them all in a single outer zip named
+# <repo>-<version>.zip, and creates a GitHub release with the outer zip as the
+# only asset.
+#
+# Users download the outer zip, unzip locally to get inner zips, and upload each
+# inner zip via Cowork's Plugins page (Customize → Plugins → upload plugin file).
+# This is the universal-fallback path; the same repo also serves the
+# marketplace-by-URL path if it ships a valid marketplace.json. See
+# cowork-distribution.md for the rationale and the other install paths.
+#
+# Adjustments you may want:
+# - If you only ship one plugin, drop the wrapping step and attach the inner zip
+#   directly: change `files: dist/*.zip` to `files: inner/*.zip`, delete the
+#   "Wrap inner zips" step, and rename inner/ to dist/.
+# - If you want per-plugin release assets instead of a single bundle, same
+#   adjustment: skip the wrapping step.
+# - If your plugin layout has plugins at the repo root (not under plugins/),
+#   change the for-loop's path glob.
+
+name: Release plugins
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so release notes can reference past tags
+
+      - name: Resolve version from tag
+        id: version
+        run: |
+          echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Building release for ${GITHUB_REF_NAME}"
+
+      - name: Build per-plugin inner zips
+        run: |
+          set -euo pipefail
+          mkdir -p inner
+          shopt -s nullglob
+          for plugin_dir in plugins/*/; do
+            name=$(basename "$plugin_dir")
+            # Cowork package limits (June 2026): 200 MB uncompressed, 5,000 files.
+            bytes=$(du -sb "$plugin_dir" | cut -f1)
+            files=$(find "$plugin_dir" -type f | wc -l)
+            if [ "$bytes" -gt $((200 * 1024 * 1024)) ] || [ "$files" -gt 5000 ]; then
+              echo "ERROR: ${name} exceeds Cowork plugin limits (${bytes} bytes / ${files} files)." >&2
+              exit 1
+            fi
+            zip_name="${name}-${{ steps.version.outputs.version }}.zip"
+            zip_path="$GITHUB_WORKSPACE/inner/${zip_name}"
+            echo "Packaging ${name} -> ${zip_name}"
+            (
+              cd "$plugin_dir"
+              zip -r "$zip_path" . \
+                -x "*.DS_Store" "*.swp" "*.swo" "__pycache__/*" "*.pyc" ".git/*" "node_modules/*"
+            )
+          done
+          echo
+          echo "Inner zips:"
+          ls -la inner/
+
+      - name: Verify at least one inner zip was built
+        run: |
+          set -euo pipefail
+          count=$(ls inner/*.zip 2>/dev/null | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "ERROR: No plugin zips were built. Check that plugins/*/ contains at least one plugin." >&2
+            exit 1
+          fi
+          echo "Verified ${count} plugin zip(s) built."
+
+      - name: Wrap inner zips in one outer release zip
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # Replace REPONAME below with your repo name (e.g., basic-harness).
+          # GitHub provides ${{ github.event.repository.name }} for this.
+          outer_name="${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.zip"
+          outer_path="$GITHUB_WORKSPACE/dist/${outer_name}"
+          (
+            cd inner
+            zip -j "$outer_path" *.zip
+          )
+          echo
+          echo "Outer release artifact:"
+          ls -la dist/
+          echo
+          echo "Contents of ${outer_name}:"
+          unzip -l "$outer_path"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          body: |
+            **Cowork install:**
+
+            1. Download `${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.zip` from the assets below.
+            2. Unzip it on your machine — you'll get one inner zip per plugin.
+            3. In Cowork, open **Customize** → **Plugins** → **upload plugin file** → select an inner zip.
+            4. Repeat for each plugin you want.
+            5. If skills don't register, restart the app (`Cmd+Q` and reopen).
+
+            Prefer not to handle zips? Add this repo as a marketplace by URL instead:
+            Customize → Plugins → add marketplace → `${{ github.repository }}`.
+
+            See the [README](https://github.com/${{ github.repository }}#install) for the full install flow.

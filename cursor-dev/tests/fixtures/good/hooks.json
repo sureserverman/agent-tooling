@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      { "command": "./hooks/guard.sh", "type": "command", "timeout": 30 }
+    ],
+    "stop": [
+      { "command": "Check that tests ran; if not, ask the agent to run them", "type": "prompt", "loop_limit": 3 }
+    ]
+  }
+}

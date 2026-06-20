@@ -1,0 +1,7 @@
+{
+  "name": "good-cowork-plugin",
+  "description": "Minimal valid Cowork-bound plugin fixture: lowercase-hyphen name, tiny package, no marketplace npm/pip sources, no stdio MCP.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": ["fixture"]
+}

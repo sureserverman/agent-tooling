@@ -1,0 +1,38 @@
+{
+  "name": "openclaw-dev",
+  "description": "Authoring kit for OpenClaw (the open-source personal AI assistant by Peter Steinberger, ex-Clawdbot/Moltbot) extensions, current as of June 2026, OpenClaw 2026.6.5. Owns the OpenClaw-specific half of extension development: AgentSkills SKILL.md skills (the single-line-JSON metadata.openclaw frontmatter block with emoji/os/always/requires gating, the six-level load precedence where same-name skills silently shadow instead of merging, session-start skill snapshots and the watcher, skills.entries config with the sandbox env-injection gotcha, Skill Workshop, ClawHub distribution via the clawhub CLI with commit-pinned installs), plugins (the DUAL manifest requirement — package.json openclaw field plus openclaw.plugin.json — definePluginEntry from focused SDK subpaths with the root barrel openclaw/plugin-sdk deprecated, api.registerTool contracts, channel plugins via defineChannelPluginEntry/createChatChannelPlugin, install via clawhub:/npm:/git:/local sources, the Gateway-restart-after-install gotcha, and the in-process trust doctrine), and automation (HOOK.md + handler.ts internal hooks with typed events, the Gateway cron scheduler with system-event/message/command payloads, /hooks webhooks with Bearer-only auth, HEARTBEAT.md periodic turns, workspace bootstrap files, and the strict-schema JSON5 openclaw.json where one unknown key prevents Gateway start). Ships a deterministic lane: validate-openclaw-artifact.sh checks dual manifests, extension pointers, root-barrel SDK imports, single-line skill metadata JSON, hook handler presence and events, and openclaw.json JSON5 parse, on the shared JSON finding contract.",
+  "version": "0.1.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/openclaw-skills",
+    "./skills/openclaw-plugin-development",
+    "./skills/openclaw-automation"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "openclaw",
+    "clawdbot",
+    "moltbot",
+    "personal-ai-assistant",
+    "agentskills",
+    "skills",
+    "clawhub",
+    "plugin",
+    "plugin-sdk",
+    "channel-plugins",
+    "hooks",
+    "cron",
+    "webhooks",
+    "heartbeat",
+    "gateway",
+    "validation"
+  ],
+  "dependencies": [
+    {
+      "name": "plugin-dev"
+    }
+  ]
+}

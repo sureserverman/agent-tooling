@@ -1,0 +1,37 @@
+{
+  "name": "codex-dev",
+  "description": "Authoring kit for OpenAI Codex (CLI + IDE extension) extensions, current as of June 2026, Codex CLI v0.139. Owns the Codex-specific half of extension development: plugins (.codex-plugin/plugin.json manifest, skills + hooks + MCP + app bundling, repo and personal marketplaces under .agents/plugins/, codex marketplace add, curated first-party plugins), skills (agentskills.io SKILL.md plus the Codex-only agents/openai.yaml sidecar, the five-tier discovery order, the ~2%-of-context catalog cap, custom-prompt deprecation and migration), subagents (one-TOML-per-agent custom agents with required developer_instructions, [agents] runtime limits, explicit-only spawning), config.toml (user + project layering, the v0.134.0 BREAKING removal of [profiles.*] and top-level profile= in favor of standalone overlay files, model/provider keys, approval and sandbox policies, [features], [tools], MCP server tables), the hooks engine (10 lifecycle events, hooks.json/TOML locations and precedence, exit-code and JSON output contracts, the /hooks trust model for non-managed command hooks), and AGENTS.md discovery (override files, git-root-to-cwd walk, project_doc_max_bytes). Ships a deterministic lane: validate-codex-artifact.sh checks .codex-plugin manifests and component pointers, SKILL.md frontmatter, agent TOML required fields, legacy [profiles.*]/profile= residue in config.toml (codex-legacy-profile), and hooks.json event names, on the shared JSON finding contract.",
+  "version": "0.1.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/codex-plugin-development",
+    "./skills/codex-skills-and-agents",
+    "./skills/codex-config-and-hooks"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "openai-codex",
+    "codex-cli",
+    "codex-ide",
+    "plugin",
+    "skills",
+    "subagents",
+    "hooks",
+    "mcp",
+    "config-toml",
+    "agents-md",
+    "marketplace",
+    "agentskills",
+    "profiles",
+    "sandbox",
+    "validation"
+  ],
+  "dependencies": [
+    {
+      "name": "plugin-dev"
+    }
+  ]
+}

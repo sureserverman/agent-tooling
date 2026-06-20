@@ -1,0 +1,35 @@
+{
+  "name": "opencode-dev",
+  "description": "Authoring kit for OpenCode (the opencode.ai terminal agent) extensions, current as of June 2026, OpenCode v1.16. Owns the OpenCode-specific half of extension development: plugins (.opencode/plugins/*.{js,ts} auto-loaded TypeScript-native via Bun, the {project, client, $, directory, worktree} hook API, ~30 hook events rebuilt on an Effect core in v1.15, npm distribution through the \"plugin\" config key), custom tools (.opencode/tools/<name>.ts with tool() from @opencode-ai/plugin, filename-derived names, built-in shadowing), agents (markdown frontmatter or opencode.json, primary/subagent/all modes, the tools-to-permission deprecation with bash glob maps), commands ($ARGUMENTS/$1..$3 templates, !`cmd` shell injection, @file inlining), config (opencode.json $schema, the 8-layer merge order, {env:}/{file:} substitution, share replacing autoshare), native Agent Skills (.opencode/skills/ plus .claude/skills/ Claude Code compat), rules (AGENTS.md canonical, CLAUDE.md fallback, instructions array with globs and remote URLs), MCP servers (local/remote, automatic OAuth with RFC 7591 DCR, the context-bloat gotcha), and themes. Ships a deterministic lane: validate-opencode-artifact.sh checks an OpenCode-bound artifact directory for agent/command frontmatter parse, the deprecated tools: map, legacy singular directories (agent/ vs agents/), opencode.json unknown keys and the deprecated autoshare flag, plugins without exports, and skill frontmatter validity, on the shared JSON finding contract.",
+  "version": "0.1.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/opencode-plugin-development",
+    "./skills/opencode-agents-and-commands",
+    "./skills/opencode-config-and-skills"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "opencode-agents",
+    "opencode-commands",
+    "opencode-skills",
+    "opencode-json",
+    "custom-tools",
+    "bun",
+    "hooks",
+    "agents-md",
+    "mcp",
+    "themes",
+    "validation"
+  ],
+  "dependencies": [
+    {
+      "name": "plugin-dev"
+    }
+  ]
+}

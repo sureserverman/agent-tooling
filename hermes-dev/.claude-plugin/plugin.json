@@ -1,0 +1,37 @@
+{
+  "name": "hermes-dev",
+  "description": "Authoring kit for Hermes Agent (Nous Research's open-source autonomous agent harness — NOT the model family), current as of June 2026, Hermes Agent v0.16 'The Surface Release'. Owns the Hermes-specific half of extension development: skills (agentskills.io SKILL.md with the Hermes-required version field and metadata.hermes.* extras, the ~/.hermes/skills/<category>/ tree with its extra CATEGORY level, skills.external_dirs cross-tool sharing, skill bundles, hermes skills install + GitHub taps + /.well-known/skills endpoints, the install-time security scan, and machine edits via the autonomous skill_manage tool), Python plugins (plugin.yaml manifest + register(ctx) with register_tool/register_hook/register_command/register_skill, the args-dict-in/JSON-string-out/never-raise handler contract, pip entry points under hermes_agent.plugins, memory-provider and context-compression plugin types), and configuration (~/.hermes/config.yaml, SOUL.md/MEMORY.md/USER.md context files, auto-loaded .hermes.md/HERMES.md/AGENTS.md/CLAUDE.md/.cursorrules project context, mcp_servers stdio + HTTP/OAuth 2.1/mTLS wiring, hermes mcp serve, the 23-platform messaging gateway, Nous Portal's 300+ models, hermes claw migrate). Ships a deterministic lane: validate-hermes-artifact.sh checks plugin.yaml parse/fields/types, register(ctx) presence, SKILL.md frontmatter incl. the version field, metadata.hermes shape, config.yaml mcp_servers entries, and Python syntax, on the shared JSON finding contract. Hermes ships multiple minor releases per month — re-verify API specifics against current docs before shipping.",
+  "version": "0.1.0",
+  "author": {
+    "name": "coder-plugins",
+    "email": "holyfiremin@gmail.com"
+  },
+  "skills": [
+    "./skills/hermes-skills",
+    "./skills/hermes-plugin-development",
+    "./skills/hermes-config"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "hermes-agent",
+    "nous-research",
+    "plugin",
+    "skills",
+    "skill-bundles",
+    "skill-taps",
+    "register-ctx",
+    "plugin-yaml",
+    "hooks",
+    "mcp",
+    "config-yaml",
+    "soul-md",
+    "agentskills",
+    "messaging-gateway",
+    "validation"
+  ],
+  "dependencies": [
+    {
+      "name": "plugin-dev"
+    }
+  ]
+}

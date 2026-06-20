@@ -1,0 +1,8 @@
+# Legacy pre-v0.134.0 config: both the [profiles.*] table and the top-level
+# profile= key were REMOVED in v0.134.0 — Codex fails at startup on either.
+model = "gpt-5.2-codex"
+profile = "foo"
+
+[profiles.foo]
+approval_policy = "never"
+sandbox_mode = "read-only"

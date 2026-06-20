@@ -1,0 +1,10 @@
+# Valid Hermes plugin manifest: all three required fields, list-typed provides_*.
+name: weather
+version: 0.1.0
+description: Weather lookup tool plus a pre-call audit hook (good fixture).
+provides_tools:
+  - get_weather
+provides_hooks:
+  - pre_tool_call
+requires_env:
+  - WEATHER_API_KEY

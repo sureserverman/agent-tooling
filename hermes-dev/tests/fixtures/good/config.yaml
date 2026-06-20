@@ -1,0 +1,11 @@
+# Valid Hermes config: every mcp_servers entry has either command (stdio) or url (HTTP).
+mcp_servers:
+  docs:
+    command: npx
+    args: ["-y", "@example/docs-mcp"]
+  search:
+    url: https://mcp.example.com/sse
+    auth: oauth
+skills:
+  external_dirs:
+    - ~/.agents/skills

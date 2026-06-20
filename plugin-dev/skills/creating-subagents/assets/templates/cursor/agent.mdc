@@ -1,0 +1,17 @@
+---
+description: <One-line blurb shown inline in Cursor — what this rule does.>
+globs:
+  - "**/<pattern>/**"
+  - "**/*.<ext>"
+alwaysApply: false
+---
+
+# <AGENT_NAME> (Cursor rule build)
+
+## Host affordances
+
+- Editor-integrated: when the user is in a matching file this rule auto-attaches.
+- Explicit chat invocation: `@<AGENT_NAME>`.
+- Prefer minimal diffs; do not rewrite files wholesale.
+
+<!-- CORE -->

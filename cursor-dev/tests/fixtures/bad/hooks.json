@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      { "command": "./hooks/guard.sh", "type": "command" }
+    ]
+  }
+}

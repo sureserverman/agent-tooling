@@ -1,0 +1,8 @@
+---
+description: House style for fixture code
+globs:
+  - "**/*.sh"
+alwaysApply: false
+---
+
+Use `set -eu` in every shell script.

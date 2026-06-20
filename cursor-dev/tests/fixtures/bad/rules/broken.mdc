@@ -1,0 +1,7 @@
+---
+description: "unterminated quote
+globs: [unclosed
+alwaysApply: maybe: nested: wrong
+---
+
+Frontmatter above is not valid YAML.

@@ -1,0 +1,7 @@
+# Bad fixture: the 'notes' mcp_servers entry has neither command (stdio) nor
+# url (HTTP) — dead config, Hermes can't start it.
+mcp_servers:
+  notes:
+    auth: oauth
+    headers:
+      X-Team: research
