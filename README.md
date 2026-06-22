@@ -112,4 +112,4 @@ and register it in `.claude-plugin/marketplace.json`.
 
 ## License
 
-Each plugin carries its own `LICENSE` (MIT).
+MIT — see [`LICENSE`](./LICENSE). Each plugin also carries its own `LICENSE`.
