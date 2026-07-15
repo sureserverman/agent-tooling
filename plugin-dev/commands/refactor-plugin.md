@@ -56,8 +56,11 @@ its decision rule and `references/refactor-recipe.md` throughout.
    skill into an agent for tidiness.
 
 If the target does no mechanical domain work **and** no batch judgment worth
-isolating (a pure interactive-judgment plugin), say so and stop — don't invent
-checks just to install a kit, and don't carve agents with no concrete benefit.
+isolating **and** persists no structured artifact worth schema-checking (a pure
+interactive-judgment plugin), say so and stop — don't invent checks just to
+install a kit, and don't carve agents with no concrete benefit. If it clears the
+bar on any one of the three lanes (mechanical → Phase 3, persisted artifact →
+Phase 3.5, batch-isolated → Phase 4), continue.
 
 ## Phase 2 — Vendor the kit
 

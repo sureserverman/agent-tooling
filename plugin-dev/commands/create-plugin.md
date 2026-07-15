@@ -73,7 +73,9 @@ Register the plugin in the marketplace's `marketplace.json` `plugins:` array.
 Match the existing entries' shape (category, tags, source, strict).
 
 If the plugin will do any mechanical domain work (parsing its configs, checking
-invariants), give it a deterministic lane from birth — vendor the kit:
+invariants) **or persists a structured artifact (discovery answered (a) yes)**,
+give it a deterministic lane from birth — vendor the kit (the artifact scanner in
+the next paragraph needs `lib/findings.sh`, which the kit vendors):
 
 ```bash
 bash "${SCRIPTS}/install-kit.sh" <marketplace-root>/<plugin-name>
@@ -81,7 +83,8 @@ bash "${SCRIPTS}/install-kit.sh" <marketplace-root>/<plugin-name>
 
 Then, guided by `plugin-dev:determinism-boundary`, add a domain validator per
 mechanical slice with `scaffold-validator.sh <plugin>/scripts <domain>` and fill
-its checks. Skip the kit for a pure-judgment plugin.
+its checks. Skip the kit only for a plugin with neither mechanical work nor a
+persisted artifact.
 
 **If discovery answered (a) yes** (the plugin persists a structured artifact),
 the kit's lane also covers the *artifact*: stamp a schema version on it and its
