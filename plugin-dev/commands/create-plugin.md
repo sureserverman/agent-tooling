@@ -36,7 +36,24 @@ Then ask which components to scaffold (multi-select):
 - Hooks (which events?)
 - MCP server bundle?
 
-Don't overplan. The user can add more later.
+Then ask the **three paradigm questions** — they decide how the determinism
+boundary applies to this plugin (each maps to a later phase; a "no" cleanly skips
+that wiring):
+
+- **(a) Will the plugin persist a structured artifact** a consumer reads back (a
+  report, a plan, an assessment)? → if yes, Phase 2 gives it a schema version +
+  scanner + fixtures (per `plugin-dev:determinism-boundary` →
+  `references/tiered-artifacts.md`).
+- **(b) Can any skill's effort vary by ~an order of magnitude** with scope
+  (research, report generation, a portfolio sweep)? → if yes, Phase 3 gives that
+  skill depth tiers (`references/depth-tiers.md`).
+- **(c) Does any skill do heavy non-interactive evidence-gathering** (reads many
+  files/sources, fans out)? → if yes, Phase 3 extracts it as a dispatched agent
+  rather than inlining it in the skill (`references/skill-to-agent.md`).
+
+Don't overplan. The user can add more later. A "no" to all three is common and
+correct for a small authoring/review plugin — it just means no artifact lane, no
+tiers, no extraction.
 
 ## Phase 2 — Foundation (always)
 
@@ -66,6 +83,13 @@ Then, guided by `plugin-dev:determinism-boundary`, add a domain validator per
 mechanical slice with `scaffold-validator.sh <plugin>/scripts <domain>` and fill
 its checks. Skip the kit for a pure-judgment plugin.
 
+**If discovery answered (a) yes** (the plugin persists a structured artifact),
+the kit's lane also covers the *artifact*: stamp a schema version on it and its
+format doc, add a `validate-<artifact>.sh` scanner with per-artifact/per-tier
+ceilings on the shared contract, and commit happy + deliberately-broken fixtures
+proving each check fires — per `references/tiered-artifacts.md`. Skip if (a) was
+no.
+
 ## Phase 3 — Components (per user choice)
 
 For each component, **scaffold the structure with a script, then write the content
@@ -88,6 +112,22 @@ For agents specifically: dispatch the `agent-creator` agent (Agent tool,
 `subagent_type: agent-creator`) once per agent with a tight brief: target path,
 purpose, scope, model preference. Don't write agent files inline — that's
 `agent-creator`'s job.
+
+**If discovery answered (b) yes** (a skill's effort varies ~10x with scope), give
+that skill depth tiers as you write its body: ask the tier first (one
+`AskUserQuestion`, in the skill), confirm scope before assuming, record the tier
+in the artifact, and pass it as the dispatch parameter to any agent the skill
+uses — per `references/depth-tiers.md`. Skip for a skill whose effort barely
+varies.
+
+**If discovery answered (c) yes** (a skill does heavy non-interactive
+evidence-gathering), don't inline that work in the skill: keep the interactive
+parts (interview, scope confirm) in the skill and **extract the batch work as a
+dispatched agent** — add it to the agents list above and dispatch `agent-creator`
+for it, pinned to the smallest model that can do the job — per
+`references/skill-to-agent.md`. The one hard constraint: anything that must ask
+the user stays in the skill (agents cannot run `AskUserQuestion`). Skip if no
+skill does isolated batch work.
 
 ## Phase 4 — Self-validate (deterministic gate, then semantic)
 
