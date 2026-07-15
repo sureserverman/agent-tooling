@@ -44,13 +44,30 @@ bash scripts/validate.sh <dir-containing-config.toml> --json
 
 | Key | Values / type | Notes |
 |---|---|---|
-| `model` | string | Model slug |
+| `model` | string | Model slug — see *Choosing a model tier* below |
 | `model_provider` | string | Id of a `[model_providers.<id>]` table; user-layer only |
 | `model_reasoning_effort` | `minimal` \| `low` \| `medium` \| `high` \| `xhigh` | |
 | `model_verbosity` | string | Output verbosity |
 | `model_context_window` | int | Override the assumed context window |
 | `model_instructions_file` | path | Replaces `experimental_instructions_file` — the old key is **deprecated**; rename it |
 | `[model_providers.<id>]` | table | Custom providers: base URL, auth env var, wire API |
+
+### Choosing a model tier (GPT-5.6)
+
+GPT-5.6 ships as three durable capability tiers (GA 2026-07-09); set `model` to one:
+
+| Slug | Tier | Best for | Price /1M (in / out) |
+|---|---|---|---|
+| `gpt-5.6-sol` | flagship / frontier reasoning | complex agentic workflows, deep-reasoning research, hard programming | $5 / $30 |
+| `gpt-5.6-terra` | balanced default | most everyday production work — GPT-5.5-class at ~half Sol's cost; standard APIs, coding, chat | $2.50 / $15 |
+| `gpt-5.6-luna` | lightweight, high-volume | classification, intent routing, moderation, simple summarization | $1 / $6 |
+
+**Routing rule.** OpenAI's guidance is to start at the *cheapest tier and lowest
+`model_reasoning_effort` that clears the task*, and escalate only when quality is
+genuinely insufficient — a higher tier or reasoning level costs more, adds latency, and
+spends more tokens. Ask "how much intelligence does this task actually need?", not "which
+model is best?". `terra` is the right default for 80–90% of work; reserve `sol` for the
+hardest reasoning/research, and drop to `luna` for cheap high-throughput calls.
 
 ## Approval and sandbox
 
