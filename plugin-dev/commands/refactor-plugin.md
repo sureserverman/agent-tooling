@@ -33,12 +33,31 @@ its decision rule and `references/refactor-recipe.md` throughout.
    ```
 
 2. Read the target's skills, agents, and commands. For each, list the concrete
-   checks/actions it performs and tag each **mechanical** (a script decides it
-   identically every run) or **judgment** (taste / rewriting / design). Surface
-   the classification to the user before changing anything.
+   checks/actions it performs and tag each into one of the **three lanes** of the
+   determinism boundary (see the parent skill's decision table and
+   `references/skill-to-agent.md`):
 
-If the target does no mechanical domain work (pure-judgment plugin), say so and
-stop — don't invent checks just to install a kit.
+   - **mechanical** — a script decides it identically every run (→ Phase 3
+     validator, or a persisted-artifact scanner if Phase 3.5 applies).
+   - **judgment-interactive** — needs the user or the conversation: an interview,
+     a confirm-before-assume step, an approval gate. *Stays in a skill/command* —
+     a dispatched agent cannot run `AskUserQuestion`.
+   - **judgment-batch-isolated** — heavy, self-contained judgment (reads many
+     files/sources, fans out, or wants a cheaper pinned model). *Candidate to
+     carve into a dispatched agent* in Phase 4.
+
+   Surface the classification to the user before changing anything.
+
+   **Extraction guard.** A judgment-batch-isolated tag is only an *invitation* to
+   extract, not a mandate. Carve a skill's work into an agent only on a concrete
+   benefit — context isolation, fan-out, cost (model pinning), tool-scoping, or
+   reuse across skills — or it stays a skill. This is the skill→agent parallel of
+   "don't invent checks just to install a kit": don't push a working, coupled
+   skill into an agent for tidiness.
+
+If the target does no mechanical domain work **and** no batch judgment worth
+isolating (a pure interactive-judgment plugin), say so and stop — don't invent
+checks just to install a kit, and don't carve agents with no concrete benefit.
 
 ## Phase 2 — Vendor the kit
 
@@ -71,6 +90,15 @@ than re-derive rules. Mirror plugin-dev's `agents/plugin-validator.md`: run
 judgment layer. Strip the now-duplicated mechanical prose; add `Bash(bash:*)` to
 `allowed-tools` where a command needs to run the lane. For write-heavy edits,
 dispatch the `agent-creator` agent or edit inline as appropriate.
+
+**Extract the batch-isolated tags into agents.** For each Phase 1 action tagged
+*judgment-batch-isolated* that cleared the extraction guard, carve it out of its
+skill into a dispatched agent (per `references/skill-to-agent.md`): dispatch
+`agent-creator` to author the agent, pin it to the smallest model that can do the
+job, and rewrite the skill to keep the interactive parts (interview, scope
+confirm) in the main loop and dispatch the agent for the batch work — passing any
+chosen depth tier as the agent's dispatch parameter. Leave a tag in place as a
+skill if it failed the guard; note why.
 
 ## Phase 5 — Document + gate
 
