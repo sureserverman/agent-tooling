@@ -1,6 +1,6 @@
 ---
 name: determinism-boundary
-description: Use when deciding which plugin work belongs in deterministic scripts versus LLM judgment, giving a plugin its own deterministic lane, or making a plugin balanced the way plugin-dev is. Triggers on "determinism boundary", "script vs judgment split", "add a deterministic lane", "make this plugin self-validating", "deterministic scripts vs LLM", "refactor plugin to use scripts".
+description: Use when deciding which plugin work belongs in deterministic scripts versus LLM judgment, splitting judgment further into interactive skills versus dispatched agents, schema-checking the artifacts a plugin persists, or making a plugin balanced the way plugin-dev is. Triggers on "determinism boundary", "script vs judgment split", "skill vs agent", "add a deterministic lane", "schema-versioned artifacts", "depth tiers", "make this plugin self-validating", "deterministic scripts vs LLM", "refactor plugin to use scripts".
 ---
 
 # determinism-boundary
@@ -10,9 +10,26 @@ plugin the same balance: **mechanical, decidable work goes in deterministic bash
 scripts; judgment stays with the LLM, which runs the scripts and consumes their
 output instead of re-deriving the rules in prose.**
 
+Judgment then splits again by *where it must run*, so the boundary is **three-way**:
+
+| Lane | Owns | Lives in |
+|---|---|---|
+| **mechanical** | decidable checks, scaffolding, artifact scanners | a deterministic **script** |
+| **judgment-interactive** | anything needing the user or the conversation | a **skill / command** (main loop) |
+| **judgment-batch-isolated** | heavy, self-contained judgment work | a dispatched **agent** |
+
 Use this when authoring a new plugin's deterministic lane (via `/create-plugin`)
-or refactoring an existing one (via `/refactor-plugin`). For the full brownfield
-walk-through, read `references/refactor-recipe.md`.
+or refactoring an existing one (via `/refactor-plugin`). Four references go deeper
+on the harder calls:
+
+- `references/refactor-recipe.md` — the full brownfield walk-through.
+- `references/skill-to-agent.md` — the interactive-vs-agent split: when to carve
+  batch work out of a skill into a dispatched agent (and when the AskUserQuestion
+  constraint forbids it).
+- `references/tiered-artifacts.md` — schema-versioning the artifacts a plugin
+  *persists*: schema version + a scanner with per-artifact ceilings + fixtures.
+- `references/depth-tiers.md` — giving an elastic skill depth tiers (ask first,
+  confirm scope, record the tier and pass it down).
 
 ## Which lane does a check belong in?
 
@@ -39,6 +56,27 @@ A plugin's *own* domain checks (does its Cargo.toml parse, are its i18n catalogs
 in sync) are deterministic and belong in **that plugin's** scripts. Validating
 plugin *structure* (manifest, frontmatter, layout) is plugin-dev's job — run
 plugin-dev's `validate-plugin.sh` from outside; don't re-implement it.
+
+## Which judgment lane: skill or agent?
+
+Once a piece of work is judgment, decide where it runs. Keep it in the **skill**
+(main loop) when it talks to the user or needs the conversation — the hard
+constraint is that a dispatched agent **cannot run `AskUserQuestion`**, so any
+interview, confirm-before-assume, or approval gate stays in the skill. Carve it
+into a dispatched **agent** only on a concrete benefit — context isolation,
+fan-out, model pinning, tool scoping, or reuse across skills — never merely
+because it's possible. Full rule and the market-research worked example:
+`references/skill-to-agent.md`.
+
+## Artifacts the plugin persists
+
+If a plugin writes a structured document a consumer reads back (a report, a plan,
+an assessment), that artifact gets the deterministic treatment too: a **schema
+version**, a **scanner** with per-artifact/per-tier ceilings on the shared
+findings contract, and **fixtures** proving each check fires. Only when the plugin
+actually persists such an artifact — most plugins don't, and should skip it. See
+`references/tiered-artifacts.md` (and `references/depth-tiers.md` when the skill
+that writes it is elastic enough to warrant depth tiers).
 
 ## The deterministic lane (the kit)
 
@@ -83,3 +121,6 @@ script, report it, add judgment. Mirror it.
 - A domain validator that tries to judge quality or rewrite — wrong lane.
 - Forking `lib/findings.sh` per plugin — it is copied verbatim; refresh with `install-kit.sh --force`.
 - Promoting a regex *candidate* (leak/POV heuristic) to `error` — keep it `warn` for the LLM to confirm.
+- Extracting an interactive step (an interview, a confirm gate) into an agent — it can't run `AskUserQuestion`; the interview stays in the skill.
+- Carving a skill into an agent with no context / fan-out / cost / scoping / reuse benefit — overhead with no payoff.
+- A prose list of "the artifact must contain sections X, Y, Z" a skill trusts the model to honor — that is an artifact scanner's job.
