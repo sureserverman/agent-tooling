@@ -16,12 +16,13 @@ If you want maximum coverage with examples, install Anthropic's. If you want a f
 
 ## Balanced by design — the determinism boundary
 
-Plugin work splits cleanly into two lanes, and this plugin keeps them apart instead of asking an LLM to do everything:
+Plugin work splits into **three lanes**, and this plugin keeps them apart instead of asking an LLM to do everything:
 
-- **Deterministic lane → bash scripts.** Anything decidable by a rule — JSON/YAML parse, required fields, `name`↔directory match, enum/whitelist checks (model, color, hook events, MCP transport), line/char caps, reference nesting, `${CLAUDE_PLUGIN_ROOT}` usage, the Stop-loop guard, `$ARGUMENTS` quoting, plaintext-secret detection — is checked by `scripts/`, fast and reproducibly, emitting a shared JSON finding contract.
-- **Semantic lane → the LLM.** Judgment calls — confirming a description leak and rewriting it, prompt-injection risk, whether a description will actually trigger, design coherence, model-tier fit — stay with the skills and agents, which **consume** the script output rather than re-deriving the rules.
+- **Deterministic lane → bash scripts.** Anything decidable by a rule — JSON/YAML parse, required fields, `name`↔directory match, enum/whitelist checks (model, color, hook events, MCP transport), line/char caps, reference nesting, `${CLAUDE_PLUGIN_ROOT}` usage, the Stop-loop guard, `$ARGUMENTS` quoting, plaintext-secret detection — is checked by `scripts/`, fast and reproducibly, emitting a shared JSON finding contract. This lane also covers the **artifacts a plugin persists**: a plugin that writes a structured document a consumer reads back gets a schema version, a scanner with per-artifact/per-tier ceilings, and fixtures.
+- **Judgment-interactive lane → skills / commands (main loop).** Anything that talks to the user or needs the conversation — an interview, a confirm-before-assume step, an approval gate — stays here. A dispatched agent cannot run `AskUserQuestion`, so interactive judgment is never extractable.
+- **Judgment-batch-isolated lane → dispatched agents.** Heavy, self-contained judgment — reading many files/sources, fan-out, or work that wants a cheaper pinned model — is carved into an agent, but only on a concrete benefit (context isolation, fan-out, model pinning, tool scoping, reuse), never merely because it's possible.
 
-The validator agent runs the suite, reports its findings verbatim, then adds only the judgment layer. Creation works the same way: scaffolders generate guaranteed-valid structure; you (the LLM) write the content. See [`scripts/README.md`](scripts/README.md) for the contract and how to extend it.
+The validator agent runs the suite, reports its findings verbatim, then adds only the judgment layer. Creation works the same way: scaffolders generate guaranteed-valid structure; you (the LLM) write the content. The `determinism-boundary` skill teaches all three lanes; four references go deeper — [`refactor-recipe.md`](skills/determinism-boundary/references/refactor-recipe.md) (brownfield walk-through), [`skill-to-agent.md`](skills/determinism-boundary/references/skill-to-agent.md) (when to carve a skill into an agent), [`tiered-artifacts.md`](skills/determinism-boundary/references/tiered-artifacts.md) (schema-versioning persisted artifacts), and [`depth-tiers.md`](skills/determinism-boundary/references/depth-tiers.md) (depth tiers for elastic skills). See [`scripts/README.md`](scripts/README.md) for the contract and how to extend it.
 
 ### Deterministic suite (`scripts/`)
 
@@ -48,7 +49,7 @@ self-contained deterministic lane into any plugin:
 
 - `/refactor-plugin <path>` — survey a plugin, classify its work, vendor the kit, generate its domain validators, and rewire its agents/commands to run them. Brownfield.
 - `/create-plugin` — vendors the kit into new plugins so they're balanced from birth.
-- `determinism-boundary` skill — teaches the script-vs-judgment split (used by both).
+- `determinism-boundary` skill — teaches the three-way split (script / skill-interactive / agent-batch-isolated), plus artifact schemas and depth tiers (used by both).
 - `scripts/install-kit.sh <plugin>` + `scripts/scaffold-validator.sh <scripts-dir> <domain>` — the deterministic primitives; each target gets `lib/findings.sh` (the shared contract, verbatim) + a generic `validate.sh` orchestrator + its own `validate-<domain>.sh` files.
 
 Structure validation stays plugin-dev's external job; the kit gives a plugin its
@@ -92,8 +93,8 @@ Structure validation stays plugin-dev's external job; the kit gives a plugin its
 
 ### Commands (2)
 
-- `/create-plugin` — guided flow: discover intent, **scaffold** structure with `scripts/scaffold-*.sh`, write content via the matching skills, dispatch `agent-creator` for each agent, then gate on `scripts/validate-plugin.sh` before a semantic `plugin-validator` pass. Vendors the determinism kit into the new plugin.
-- `/refactor-plugin` — make an existing plugin balanced: survey, vendor the kit, generate its domain validators, rewire its agents/commands to consume them.
+- `/create-plugin` — guided flow: discover intent, **scaffold** structure with `scripts/scaffold-*.sh`, write content via the matching skills, dispatch `agent-creator` for each agent, then gate on `scripts/validate-plugin.sh` before a semantic `plugin-validator` pass. Vendors the determinism kit into the new plugin. Discovery asks three paradigm questions — does the plugin persist an artifact (→ schema + scanner + fixtures), can a skill's effort vary ~10x (→ depth tiers), does a skill do heavy non-interactive evidence-gathering (→ extract it as an agent) — each with a clean skip for the common "no".
+- `/refactor-plugin` — make an existing plugin balanced: survey each action into the three lanes (mechanical / judgment-interactive / judgment-batch-isolated), vendor the kit, generate its domain validators, add schema + scanner + fixtures for any persisted artifact and depth tiers for any elastic skill, and rewire its agents/commands — carving batch judgment into agents only on a concrete benefit.
 
 ## Anti-patterns this plugin will catch
 
