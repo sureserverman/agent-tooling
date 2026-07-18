@@ -1,0 +1,4 @@
+{"type":"user","timestamp":"2026-01-10T09:00:00.000Z","message":{"role":"user","content":"do a thing"}}
+{"type":"assistant","timestamp":"2026-01-10T09:00:05.000Z","message":{"role":"assistant","content":[{"type":"text","text":"ok"},{"type":"tool_use","name":"Skill","input":{"skill":"someplugin:alpha","args":""}}]}}
+{"type":"assistant","timestamp":"2026-03-15T14:30:00.000Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Skill","input":{"skill":"alpha"}}]}}
+{"type":"assistant","timestamp":"2026-02-01T10:00:00.000Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Read","input":{"file_path":"/x"}}]}}
