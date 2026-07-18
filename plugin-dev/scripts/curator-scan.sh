@@ -47,15 +47,24 @@ PINNED=""
 if [ -f "$PINS" ]; then
   PINNED=$(grep -vE '^\s*(version:|#|$)' "$PINS" | tr -d ' ' || true)
 fi
-is_pinned() { printf '%s\n' "$PINNED" | grep -qxF "$1"; }
+# Empty needle must never match: a nameless/malformed skill (name="") would
+# otherwise exact-match the blank line printf emits and be wrongly "pinned".
+is_pinned() { [ -n "$1" ] && printf '%s\n' "$PINNED" | grep -qxF "$1"; }
 
 INV=$(bash "$DIR/curator-inventory.sh" "${ROOTS[@]}" --json)
-NAMES=$(printf '%s' "$INV" | jq -r '.skills[].name' | sort -u)
-[ -n "$NAMES" ] && USAGE=$(bash "$DIR/curator-usage.sh" --sessions "$SESSDIR" --json $NAMES) || USAGE='{"usage":[]}'
+# Array-valued so a name containing a space stays one argument to curator-usage.sh.
+mapfile -t NAME_ARR < <(printf '%s' "$INV" | jq -r '.skills[].name' | sort -u | grep -v '^$' || true)
+if [ "${#NAME_ARR[@]}" -gt 0 ]; then
+  USAGE=$(bash "$DIR/curator-usage.sh" --sessions "$SESSDIR" --json "${NAME_ARR[@]}")
+else
+  USAGE='{"usage":[]}'
+fi
 
+# Echo epoch seconds, or empty string on parse failure — callers must fail SAFE
+# (fall back to mtime), never to 0 (which would read as ~20000 days = ancient).
 iso_to_epoch() { # strip millis, tolerate GNU/BSD date
   local t="${1%.*}"; [ "${t: -1}" = Z ] || t="${t}Z"
-  date -u -d "$t" +%s 2>/dev/null || date -u -jf "%Y-%m-%dT%H:%M:%SZ" "$t" +%s 2>/dev/null || echo 0
+  date -u -d "$t" +%s 2>/dev/null || date -u -jf "%Y-%m-%dT%H:%M:%SZ" "$t" +%s 2>/dev/null || true
 }
 
 RECORDS=()
@@ -66,7 +75,14 @@ while IFS= read -r rec; do
   mtime=$(jq -r '.mtime' <<<"$rec")
   last=$(printf '%s' "$USAGE" | jq -r --arg n "$name" '.usage[]|select(.skill==$n)|.last // empty' | head -1)
   if [ -n "$last" ] && [ "$last" != "null" ]; then
-    eff=$(iso_to_epoch "$last"); basis="usage"
+    eff=$(iso_to_epoch "$last")
+    if [ -n "$eff" ]; then
+      basis="usage"
+    else
+      # Timestamp present but unparseable: use the file's mtime (a real signal),
+      # never epoch 0. basis marks it so a human can see the parse fell through.
+      eff="$mtime"; basis="usage-unparsed"; last=null
+    fi
   else
     eff="$mtime"; basis="mtime"; last=null
   fi

@@ -50,7 +50,7 @@ for root in "${ROOTS[@]}"; do
     sdir="$(dirname "$skill")"
     origin="$(origin_of "$sdir" "$root")"
     bytes="$(wc -c < "$skill" | tr -d ' ')"
-    mtime="$(stat -c %Y "$skill" 2>/dev/null || stat -f %m "$skill")"
+    mtime="$(stat -c %Y "$skill" 2>/dev/null || stat -f %m "$skill" 2>/dev/null || echo 0)"
     name="$(frontmatter_field "$skill" name)"
     desc="$(frontmatter_field "$skill" description)"
     RECORDS+=("$(jq -nc \

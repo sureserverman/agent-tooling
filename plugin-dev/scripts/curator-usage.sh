@@ -34,14 +34,23 @@ done
 AGG=$(
   find "$SESSDIR" -name '*.jsonl' -type f 2>/dev/null -print0 \
     | while IFS= read -r -d '' f; do
-        jq -rc 'select(.type=="assistant")
+        # -R + fromjson? parses each LINE independently: one malformed/truncated
+        # line loses only itself, never the rest of the file or later files.
+        # || true keeps a jq crash from aborting this set -e subshell mid-scan.
+        jq -rc -R '(fromjson? // empty)
+                | select(.type=="assistant")
                 | .timestamp as $t
                 | (.message.content // [])[]?
                 | select(type=="object" and .type=="tool_use" and .name=="Skill")
-                | [$t, (.input.skill // "")] | @tsv' "$f" 2>/dev/null
+                | [$t, (.input.skill // "")] | @tsv' "$f" 2>/dev/null || true
       done \
     | awk -F'\t' '
-        {
+        # Aggregate ONLY the canonical Claude Code shape YYYY-MM-DDTHH:MM:SS.mmmZ.
+        # Lexicographic max is provably correct within this one fixed format;
+        # any other shape (bare-Z, numeric offset, hand-edited) is skipped rather
+        # than trusted, so a stray stamp can never win the max. All-skipped ->
+        # the skill reads as no-evidence and falls back to mtime (safe direction).
+        $1 ~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9]+Z$/ {
           skill=$2; sub(/.*:/,"",skill)          # bare component
           if (skill=="") next
           cnt[skill]++
