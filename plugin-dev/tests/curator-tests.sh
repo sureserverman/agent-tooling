@@ -41,6 +41,21 @@ check "space-name stays one skill"          'any(.skills[]; .name=="two words")'
 E2=$(bash "$S/curator-scan.sh" "$FX/edge2/estate" --sessions "$FX/edge2/sessions" --pins /nonexistent --now 1789000000 --json)
 check "unparseable ts -> mtime fallback, not epoch0" '(.skills[]|select(.name=="up").basis)=="usage-unparsed" and (.skills[]|select(.name=="up").age_days)<365' "$E2"
 
+echo "validate-curator:"
+VCB=$(bash "$S/validate-curator.sh" "$FX/artifacts-bad" --json 2>/dev/null || true)
+check "malformed pins -> version error" '.summary.errors>=1 and any(.findings[]; .rule=="curator-pins-no-version")' "$VCB"
+VCG=$(bash "$S/validate-curator.sh" "$FX/artifacts-good" --json 2>/dev/null)
+check "well-formed artifacts -> zero findings" '.summary.errors==0 and .summary.warnings==0 and (.findings|length==0)' "$VCG"
+
+echo "curator-archive (round-trip):"
+AT="$(mktemp -d)/skills"; mkdir -p "$AT/gamma"; printf -- '---\nname: gamma\ndescription: d\n---\nG\n' > "$AT/gamma/SKILL.md"
+cp -r "$AT/gamma" "$AT/../gamma-pristine"
+bash "$S/curator-archive.sh" archive gamma --skills-root "$AT" >/dev/null
+[ ! -d "$AT/gamma" ] && [ -d "$AT/.archive/gamma" ] && ok "archive moves out of active set" || bad "archive moves out of active set"
+bash "$S/curator-archive.sh" restore gamma --skills-root "$AT" >/dev/null
+if diff -r "$AT/../gamma-pristine" "$AT/gamma" >/dev/null 2>&1; then ok "restore is byte-identical"; else bad "restore is byte-identical"; fi
+if bash "$S/curator-archive.sh" archive nope --skills-root "$AT" >/dev/null 2>&1; then bad "bad slug -> nonzero"; else ok "bad slug -> nonzero"; fi
+
 echo
 echo "curator-tests: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
