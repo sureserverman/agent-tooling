@@ -26,14 +26,16 @@ if [ -f "$PINS" ]; then
   fi
   # Slug lines: everything that is not the version header, a comment, or blank.
   ln=0
-  while IFS= read -r line; do
+  while IFS= read -r line || [ -n "$line" ]; do   # || … : also read a final unterminated line
     ln=$((ln+1))
-    case "$line" in ''|\#*|version:*) continue ;; esac
-    stripped=$(printf '%s' "$line" | tr -d '[:space:]')
-    [ -z "$stripped" ] && continue
-    printf '%s' "$stripped" | grep -qE '^[a-z0-9][a-z0-9-]*$' \
+    # Trim only leading/trailing whitespace (NOT internal) — an internal space
+    # must still fail the slug check, and an indented comment/header must still
+    # be skipped, matching the header grep's whitespace tolerance above.
+    trimmed=$(printf '%s' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    case "$trimmed" in ''|\#*|version:*) continue ;; esac
+    printf '%s' "$trimmed" | grep -qE '^[a-z0-9][a-z0-9-]*$' \
       || add_finding warn curator-pins-bad-slug curator "$PINS" "$ln" \
-           "pin entry '$stripped' is not a valid kebab-case skill slug"
+           "pin entry '$trimmed' is not a valid kebab-case skill slug"
   done < "$PINS"
 fi
 

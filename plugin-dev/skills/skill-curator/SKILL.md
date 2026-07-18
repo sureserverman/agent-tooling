@@ -2,7 +2,7 @@
 name: skill-curator
 description: Use to review and maintain the personal skills estate — surface stale or unused skills and archive, consolidate, or patch them safely. Triggers on "curate my skills", "which skills are stale", "clean up my skills", "skill maintenance", "archive unused skills", "skill decay".
 disable-model-invocation: true
-allowed-tools: Bash, Read, Edit, Grep, Glob, AskUserQuestion, Task
+allowed-tools: Bash, Read, Edit, Write, Grep, Glob, AskUserQuestion, Task
 ---
 
 # Skill Curator
@@ -19,22 +19,29 @@ the single mutating script (`curator-archive.sh`) only ever moves files.
 
 ## Hard safety rules — read before acting
 
-These are invariants, not defaults. They hold for every run:
+Two of these are enforced by `curator-archive.sh` itself and hold even if this
+skill's reasoning goes wrong; the other three are procedural — you must follow
+them, because no script checks them for you.
 
-1. **Plugin/marketplace skills are report-only.** Any skill whose `origin` is
-   `plugin` is git-managed and lives in someone's repo. Surface it in the report
-   so the user knows it exists, but never archive, patch, or edit it here. Only
-   `origin: personal` skills (under `~/.claude/skills`) are actionable.
-2. **Nothing is ever deleted.** The worst thing that happens to a skill is a
-   move into `~/.claude/skills/.archive/`, reversible with one `restore`.
-3. **Pinned skills are never offered for archival.** A skill in state `pinned`
-   may be patched if the user asks, but is never presented as an archive
-   candidate regardless of age.
-4. **Snapshot before the first mutation of a session.** Run
+1. **Plugin/marketplace skills are report-only.** *(Procedural — not code-checked.)*
+   Any skill whose `origin` is `plugin` is git-managed and lives in someone's
+   repo. Surface it in the report so the user knows it exists, but never archive,
+   patch, or edit it here. Only `origin: personal` skills (under
+   `~/.claude/skills`) are actionable. `curator-archive.sh` does not re-derive
+   origin — passing it a plugin slug is on you to never do.
+2. **Nothing is ever deleted.** *(Code-enforced.)* `curator-archive.sh` has no
+   delete verb; the worst thing that happens to a skill is a move into
+   `~/.claude/skills/.archive/`, reversible with one `restore`.
+3. **Pinned skills are never archived.** *(Code-enforced.)* `curator-archive.sh
+   archive` reads `.curator-pins` and refuses a pinned slug, so a bad call can't
+   violate this. Still, do not even *offer* a pinned skill for archival — it may
+   be patched on request, never archived.
+4. **Snapshot before the first mutation of a session.** *(Procedural.)* Run
    `curator-archive.sh snapshot` once, before any archive or patch, so the whole
    estate can be rolled back from a tar.gz.
-5. **Confirm before acting.** Archiving and patching happen only on an explicit
-   per-skill choice via AskUserQuestion. Never batch-archive without asking.
+5. **Confirm before acting.** *(Procedural.)* Archiving and patching happen only
+   on an explicit per-skill choice via AskUserQuestion. Never batch-archive
+   without asking.
 
 ## Step 1 — Scan the estate
 
@@ -122,6 +129,20 @@ patch-eligible. To pin or unpin, edit that file (create it with the `version: 1`
 header if absent). Offer pinning for any skill the user chooses to **Keep** that
 keeps resurfacing as an archive candidate — pinning stops the noise without
 losing the skill.
+
+## Undo — restoring an archived skill
+
+Archival is always reversible. To bring a skill back:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/curator-archive.sh" list           # what's archived
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/curator-archive.sh" restore <slug>  # move it back
+```
+
+`restore` refuses to overwrite a live skill of the same name. For a full rollback
+of a session's changes, untar the pre-run snapshot from
+`~/.claude/skills/.archive/snapshots/`. After a restore, remind the user to
+re-propagate (Step 5) so the mirrors match.
 
 ## What this skill never does
 

@@ -56,6 +56,36 @@ bash "$S/curator-archive.sh" restore gamma --skills-root "$AT" >/dev/null
 if diff -r "$AT/../gamma-pristine" "$AT/gamma" >/dev/null 2>&1; then ok "restore is byte-identical"; else bad "restore is byte-identical"; fi
 if bash "$S/curator-archive.sh" archive nope --skills-root "$AT" >/dev/null 2>&1; then bad "bad slug -> nonzero"; else ok "bad slug -> nonzero"; fi
 
+echo "curator-archive (guards):"
+G="$(mktemp -d)/skills"; mkdir -p "$G/live" "$G/.archive/live" "$G/dup"
+printf -- '---\nname: live\ndescription: d\n---\nL\n' > "$G/live/SKILL.md"
+printf -- '---\nname: live\ndescription: d\n---\nOLD\n' > "$G/.archive/live/SKILL.md"
+printf -- '---\nname: dup\ndescription: d\n---\nD\n' > "$G/dup/SKILL.md"
+fails() { if bash "$S/curator-archive.sh" "$@" >/dev/null 2>&1; then bad "$LBL"; else ok "$LBL"; fi; }
+LBL="archive-collision refused"          fails archive live --skills-root "$G"
+LBL="restore-collision refused"          fails restore live --skills-root "$G"
+LBL="path-traversal slug rejected"       fails archive ../../etc --skills-root "$G"
+LBL="absolute-path slug rejected"        fails archive /etc --skills-root "$G"
+LBL="non-kebab slug rejected"            fails archive Bad_Name --skills-root "$G"
+LBL="relative --skills-root rejected"    fails archive dup --skills-root relative/dir
+# pinned skill refused by the code backstop
+printf 'version: 1\ndup\n' > "$G/.curator-pins"
+LBL="pinned skill refused by archive"    fails archive dup --skills-root "$G"
+# snapshot overwrite refused
+bash "$S/curator-archive.sh" snapshot --skills-root "$G" --label t1 >/dev/null 2>&1
+LBL="snapshot overwrite refused"         fails snapshot --skills-root "$G" --label t1
+
+echo "validate-curator (layout findings):"
+BL="$(mktemp -d)"; mkdir -p "$BL/.archive/orphan" "$BL/.archive/snapshots"
+printf 'stray\n' > "$BL/.archive/snapshots/notes.txt"
+VCL=$(bash "$S/validate-curator.sh" "$BL" --json 2>/dev/null || true)
+check "orphan archive dir -> warn" 'any(.findings[]; .rule=="curator-archive-orphan")' "$VCL"
+check "foreign snapshot file -> info" 'any(.findings[]; .rule=="curator-snapshot-foreign")' "$VCL"
+# internal-space pin slug must still be flagged (whitespace-strip false-negative fix)
+SP="$(mktemp -d)"; printf 'version: 1\nbad slug\n' > "$SP/.curator-pins"
+VSP=$(bash "$S/validate-curator.sh" "$SP" --json 2>/dev/null || true)
+check "internal-space pin slug flagged" 'any(.findings[]; .rule=="curator-pins-bad-slug")' "$VSP"
+
 echo
 echo "curator-tests: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
