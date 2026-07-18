@@ -8,6 +8,12 @@
 # namespaced ("planning:foo") or bare ("foo"). We match on the bare component
 # (everything after the last ':'), which is the skill's frontmatter `name`.
 #
+# This is a pure extraction layer: the canonical-shape regex below checks stamp
+# SHAPE, not semantics — a syntactically valid but nonsensical stamp (e.g.
+# month 13) passes through here and is caught downstream by curator-scan.sh's
+# iso_to_epoch (which falls back to mtime). Read `last` from this script as
+# "most recent well-shaped invocation stamp", not "a validated date".
+#
 # The critical distinction the curator relies on:
 #   - a skill seen in history        -> {last:<iso>, count:N}
 #   - a skill NEVER seen, with history present -> state "no-evidence"
