@@ -101,3 +101,4 @@ dist/
 # ===== sec-audit artifacts =====
 sec-audit-report-*.md
 sec-audit-findings-*.jsonl
+.claude/plan-progress.json
