@@ -58,7 +58,7 @@ for root in "${ROOTS[@]}"; do
       --argjson bytes "${bytes:-0}" --argjson mtime "${mtime:-0}" \
       --arg name "$name" --arg description "$desc" \
       '{path:$path,origin:$origin,bytes:$bytes,mtime:$mtime,name:$name,description:$description}')")
-  done < <(find "$root" -mindepth 2 -maxdepth 6 -name SKILL.md -type f | sort)
+  done < <(find "$root" -mindepth 2 -maxdepth 6 -name SKILL.md -type f -not -path '*/.archive/*' | sort)
 done
 
 if [ "${#RECORDS[@]}" -gt 0 ]; then
