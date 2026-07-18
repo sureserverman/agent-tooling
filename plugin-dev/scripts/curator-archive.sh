@@ -58,10 +58,13 @@ need_slug() {
 taken() { [ -e "$1" ] || [ -L "$1" ]; }
 
 # same_device <a> <b> — both must exist; true iff on the same filesystem.
+# GNU `stat -c %d` then BSD/macOS `stat -f %d` (same dual-stat fallback as
+# curator-inventory.sh) so this works on both platforms; distinct sentinels
+# would falsely report "different device" if both stat forms failed.
 same_device() {
   local da db
-  da=$(stat -c %d "$1" 2>/dev/null || echo x)
-  db=$(stat -c %d "$2" 2>/dev/null || echo y)
+  da=$(stat -c %d "$1" 2>/dev/null || stat -f %d "$1" 2>/dev/null || echo x)
+  db=$(stat -c %d "$2" 2>/dev/null || stat -f %d "$2" 2>/dev/null || echo x)
   [ "$da" = "$db" ]
 }
 
@@ -95,6 +98,7 @@ case "$CMD" in
     ;;
   restore)
     need_slug
+    [ -d "$ROOT" ] || { echo "error: skills root does not exist: $ROOT" >&2; exit 1; }
     SRC="$ARCHIVE/$SLUG"
     [ -d "$SRC" ] || { echo "error: not archived: $SLUG (looked in $ARCHIVE)" >&2; exit 1; }
     DEST="$ROOT/$SLUG"
