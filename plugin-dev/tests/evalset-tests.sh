@@ -44,6 +44,14 @@ CR=$(bash "$S/skill-eval-gate.sh" compare "$FX/scores-baseline.json" "$FX/scores
 check "regressing rewrite rejected" '.accepted==false and (.regressions[0].case_id=="catches-description-leak")' "$CR"
 CI=$(bash "$S/skill-eval-gate.sh" compare "$FX/scores-baseline.json" "$FX/scores-improve.json" 2>/dev/null)
 check "improving rewrite accepted" '.accepted==true and (.regressions|length==0)' "$CI"
+# Critical regression guard: a case with NO judge score must FAIL, not vanish->PASS.
+echo '[{"case_id":"authors-a-valid-skill","weighted_total":4.5}]' > /tmp/evalset-missing-score.json
+MS=$(bash "$S/skill-eval-gate.sh" verdict "$FX/skilldir-good/evals/cases.yaml" /tmp/evalset-missing-score.json 2>/dev/null || true)
+check "missing judge score -> FAIL not PASS" '.verdict=="FAIL" and (.failed|index("catches-description-leak")!=null) and (.cases|length==2)' "$MS"
+DUP=$(bash "$S/validate-evalset.sh" "$FX/bad-dupid.yaml" --json 2>/dev/null || true)
+check "duplicate case id -> finding" 'any(.findings[]; .rule=="evalset-dup-id")' "$DUP"
+ZW=$(bash "$S/validate-evalset.sh" "$FX/bad-zeroweight.yaml" --json 2>/dev/null || true)
+check "zero-weight rubric -> finding" 'any(.findings[]; .rule=="evalset-case-bad-rubric")' "$ZW"
 
 echo
 echo "evalset-tests: $PASS passed, $FAIL failed"

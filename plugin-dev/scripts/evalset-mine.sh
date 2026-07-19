@@ -25,7 +25,7 @@ done
 
 # Usage-signal gate via curator-usage.sh (single source of truth for "did it fire").
 USAGE=$(bash "$DIR/curator-usage.sh" --sessions "$SESSDIR" --json "$SKILL")
-COUNT=$(printf '%s' "$USAGE" | jq -r '.usage[0].count // 0')
+COUNT=$(printf '%s' "$USAGE" | jq -r --arg s "$SKILL" '[.usage[]|select(.skill==$s)|.count][0] // 0')
 if [ "$COUNT" = 0 ]; then
   echo "# no session usage for '$SKILL' — nothing to mine (author synthetic/golden cases instead)" >&2
   exit 1
@@ -94,6 +94,6 @@ for i, c in enumerate(cases, 1):
     print(f"    source: session")
     print(f"    prompt: |")
     print(block(c["prompt"], 6))
-    print(f"    session_ref: \"{c['ref']}\"")
+    print(f"    session_ref: {json.dumps(c['ref'])}")  # json string == valid YAML scalar; escapes safely
     print(f"    rubric: TODO   # fill in: list of {{criterion, weight}}")
 PY

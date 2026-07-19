@@ -75,8 +75,12 @@ case "$CMD" in
     RESULT=$(printf '%s' "$CJSON" | jq \
       --argjson scores "$SC" --argjson min "$MIN" --argjson pf "$PF" '
       [ .cases[] | .id as $id
-        | ($scores[] | select(.case_id==$id) | .weighted_total) as $wt
-        | {id:$id, weighted_total:($wt // null),
+        # array-then-first so a case with NO matching score binds null (a fail),
+        # never dropped from the set — a missing/crashed judge must FAIL, not
+        # silently vanish from numerator AND denominator. first also collapses
+        # duplicate score rows so they cannot inflate the denominator.
+        | ( ([$scores[] | select(.case_id==$id) | .weighted_total] | first) // null ) as $wt
+        | {id:$id, weighted_total:$wt,
            min:$min, pass:(($wt // -1) >= $min)} ] as $cases
       | ($cases | map(select(.pass)) | length) as $npass
       | ($cases | length) as $n

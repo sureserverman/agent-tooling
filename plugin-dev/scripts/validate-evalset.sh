@@ -55,6 +55,11 @@ printf '%s' "$DOC" | jq -e '.thresholds and (.thresholds.min_case_score|type=="n
 # cases present
 NCASES=$(printf '%s' "$DOC" | jq '(.cases // [])|length')
 [ "$NCASES" -gt 0 ] || add_finding error evalset-no-cases evalset "$TARGET" 0 "no cases defined"
+# case ids must be unique — the case_id join in skill-eval-gate.sh depends on it.
+if [ "$NCASES" -gt 0 ]; then
+  printf '%s' "$DOC" | jq -e '(.cases|map(.id)|length)==(.cases|map(.id)|unique|length)' >/dev/null 2>&1 \
+    || add_finding error evalset-dup-id evalset "$TARGET" 0 "case ids must be unique across .cases[]"
+fi
 
 # per-case checks
 i=0
@@ -69,7 +74,7 @@ while [ "$i" -lt "$NCASES" ]; do
   esac
   [ -n "$(printf '%s' "$c" | jq -r '.prompt // empty')" ] || add_finding error evalset-case-no-prompt evalset "$TARGET" 0 "case '$cid' has no prompt"
   # rubric: required unless --draft and it's a TODO stub
-  hasrubric=$(printf '%s' "$c" | jq -e '(.rubric|type=="array") and (.rubric|length>0) and all(.rubric[]; .criterion and (.weight|type=="number"))' >/dev/null 2>&1 && echo 1 || echo 0)
+  hasrubric=$(printf '%s' "$c" | jq -e '(.rubric|type=="array") and (.rubric|length>0) and all(.rubric[]; (.criterion|type=="string") and (.weight|type=="number") and (.weight>0))' >/dev/null 2>&1 && echo 1 || echo 0)
   if [ "$hasrubric" = 0 ]; then
     isstub=$(printf '%s' "$c" | jq -e '.rubric=="TODO" or (.rubric|type=="null")' >/dev/null 2>&1 && echo 1 || echo 0)
     if [ "$DRAFT" = 1 ] && [ "$isstub" = 1 ]; then
