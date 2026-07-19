@@ -33,6 +33,9 @@ The validator agent runs the suite, reports its findings verbatim, then adds onl
 | `curator-{inventory,usage,scan}.sh` | Read-only skill-lifecycle scan lane (driven by `skill-curator`): enumerate the estate, extract last-triggered from session history, classify fresh/stale/archive-candidate/pinned/report-only. |
 | `curator-archive.sh` | The only mutating curator script — move-only snapshot / archive / restore (never deletes). |
 | `validate-curator.sh <root>` | Validates the curator's runtime artifacts (`.curator-pins`, `.archive/` layout) on the shared contract; invoked by the skill, not the orchestrator. |
+| `validate-evalset.sh <cases.yaml>` | Validates a skill eval set (`skill-eval`); YAML→JSON via python3+pyyaml, jq on the shared contract. |
+| `evalset-mine.sh <skill>` | Drafts `source: session` eval cases from history (wraps `curator-usage.sh` as the usage gate). |
+| `skill-eval-gate.sh <precheck\|verdict\|compare>` | The deterministic half of `skill-eval`: mechanical prechecks (15 KB ceiling, valid eval set), threshold verdict, and the rewrite baseline-comparison. |
 | `scaffold-{plugin,skill,command,hook}.sh` | Generate valid skeletons (correct frontmatter/layout), idempotent, self-validating. |
 | `lib/findings.sh` | Shared finding accumulator + renderer — the one place the JSON contract lives. |
 
@@ -85,8 +88,9 @@ Structure validation stays plugin-dev's external job; the kit gives a plugin its
 | `creating-subagents` | "create a subagent that works on Claude Code + Codex + Cursor + OpenCode", "scaffold a cross-host agent", "port this agent to other tools" |
 | `skill-workshop` | "what should be a skill", "mine my sessions", "find patterns in my history", "discover skill candidates" — explicit-invocation only (`disable-model-invocation: true`); pairs with the `session-analyzer` agent |
 | `skill-curator` | "curate my skills", "which skills are stale", "clean up my skills", "archive unused skills" — explicit-invocation only; the decay half of the skill lifecycle (staleness scan → keep/patch/consolidate/archive, archive-never-delete); pairs with the `curator-*.sh` scan lane |
+| `skill-eval` | "evaluate this skill", "does this skill work", "score my skill", "skill eval" — explicit-invocation only; runs eval cases, judges them against rubrics with the separate `skill-judge` agent, gates on hard thresholds (≤15 KB, per-case pass), rewrite→eval→compare loop |
 
-### Agents (4)
+### Agents (5)
 
 | Agent | Model | Tools | Purpose |
 |---|---|---|---|
@@ -94,6 +98,7 @@ Structure validation stays plugin-dev's external job; the kit gives a plugin its
 | `skill-reviewer` | haiku | Read, Grep, Glob | Description leak-audit + injection scan + best-practice review on a SKILL.md. Read-only. |
 | `agent-creator` | sonnet | Write, Read | Generates a new agent file from a brief. |
 | `session-analyzer` | haiku | Bash, Read, Write, Grep, Glob | Parses Claude Code session JSONL files into ranked skill candidates. Driven by `skill-workshop`. |
+| `skill-judge` | sonnet | Read, Grep, Glob | Scores one skill-eval case against its rubric from the case-runner transcript — evidence per criterion, no bare pass/fail. Driven by `skill-eval`. |
 
 ### Commands (2)
 
