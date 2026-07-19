@@ -207,61 +207,63 @@ cat /tmp/sw-progress.txt
 
 ## Phase B: Analyze Patterns
 
-Now read the extracted data and identify skill candidates.
+Now read the extracted data and identify skill candidates. Each candidate is
+classified by the signal that makes it worth turning into a skill — one of four
+**canonical trigger heuristics** (adapted from Nous Research's Hermes Agent).
+Use these exact label strings; a downstream skill (`skill-workshop`) and a
+sibling tool (`obsidian-wiki:scan-sessions`) depend on them being spelled
+identically:
 
-### B1. Analyze repeated explanations
+- **`user-correction`** — the user corrected Claude's approach and the corrected
+  approach then succeeded. Strongest signal: a correction is direct evidence a
+  skill was missing.
+- **`error-resolved`** — an error was hit and resolved through visible
+  trial-and-error (≥2 failed attempts before the fix). The hard-won fix is worth
+  capturing so it isn't rediscovered.
+- **`nonobvious-workflow`** — a working procedure that required discovery (docs
+  lookup, experimentation, domain rules restated) rather than being derivable
+  from the request.
+- **`recurring-toolchain`** — the same 5+ tool-call sequence shape appears in ≥2
+  sessions. Weakest signal on its own (repetition ≠ missing skill), but a real
+  candidate when the sequence encodes a workflow.
 
-Read `/tmp/sw-user-messages.jsonl`. Group messages by semantic similarity.
+### B1. Detect `user-correction`
 
-Look for these signals:
-- Same concept/entity explained in 3+ **different** sessions
-- Same corrections to Claude's behavior repeated across sessions
-- Same domain-specific terminology or rules restated
-- Same setup/configuration instructions given repeatedly
+Read `/tmp/sw-error-corrections.json` and `/tmp/sw-user-messages.jsonl`. Look for
+a user message that contradicts or redirects Claude's prior approach ("no, use
+X", "that's wrong", "actually you should…") followed by a successful outcome
+(no repeat of the same correction later in the session). Note the corrected
+behavior and 2-3 quotes.
 
-For each group, note:
-- The common theme (1 sentence)
-- How many unique sessions it appears in
-- 2-3 representative quotes
-- A suggested skill name (kebab-case)
+### B2. Detect `error-resolved`
 
-### B2. Analyze tool chain patterns
+Read `/tmp/sw-error-corrections.json`. Look for an error (`error`/`failed`/
+non-zero exit in tool_result) followed by ≥2 attempts before success — the
+trial-and-error signature. Generalize the error and the fix that resolved it.
 
-Read `/tmp/sw-tool-chains.jsonl`. Find recurring sequences.
+### B3. Detect `nonobvious-workflow` and `recurring-toolchain`
 
-Aggregate tool sequences per session and look for:
-- Same 3+ tool sequence appearing in 3+ different sessions
-- Filter OUT trivial patterns: lone [Read], [Grep, Read], [Read, Read, Read]
-- Keep patterns that suggest a workflow: [Grep, Read, Edit, Bash], [Bash, Read, Edit, Bash]
+- `nonobvious-workflow`: read `/tmp/sw-user-messages.jsonl`; group by semantic
+  similarity. A procedure/rule restated across 3+ **different** sessions, or a
+  single discovery that required lookup/experimentation, is a candidate.
+- `recurring-toolchain`: read `/tmp/sw-tool-chains.jsonl`; find the same 5+ tool
+  sequence in ≥2 sessions. Filter OUT trivial patterns (lone `[Read]`,
+  `[Grep, Read]`, `[Read, Read, Read]`); keep workflow-shaped sequences
+  (`[Grep, Read, Edit, Bash]`, `[Bash, Read, Edit, Bash]`).
 
-For each pattern, note:
-- The tool sequence
-- Frequency (unique sessions)
-- What task the pattern likely represents
-
-### B3. Analyze workaround patterns
-
-Read `/tmp/sw-error-corrections.json`. Group similar errors.
-
-Look for:
-- Same type of error occurring in 2+ different sessions
-- User corrections that teach Claude the same fix repeatedly
-- Environment-specific gotchas (paths, flags, configs)
-
-For each group, note:
-- The error pattern (generalized)
-- The workaround (generalized)
-- Frequency
-- Direct quotes of the corrections
+For each candidate, note: the heuristic label, the common theme (1 sentence),
+unique-session frequency, 2-3 quotes, and a suggested kebab-case skill name.
 
 ### B4. Score and rank candidates
 
-Score each candidate: `frequency × type_weight`
+Score each candidate: `frequency × trigger_weight`. Weights encode the ordering
+above — a correction or a hard-won fix is stronger evidence of a missing skill
+than mere repetition:
 
-Type weights:
-- workaround: 1.2 (prevents concrete errors)
-- repeated_explanation: 1.0
-- tool_chain: 0.8 (higher false positive rate)
+- `user-correction`: 1.3
+- `error-resolved`: 1.2
+- `nonobvious-workflow`: 1.0
+- `recurring-toolchain`: 0.8 (higher false-positive rate)
 
 Normalize scores to 0.0-1.0 range.
 
@@ -285,7 +287,7 @@ Write the final results to `/tmp/skill-workshop-results.json`:
     {
       "rank": 1,
       "suggested_name": "kebab-case-name",
-      "signal_type": "repeated_explanation",
+      "trigger": "user-correction",
       "score": 0.92,
       "frequency": 5,
       "description": "1-2 sentence summary of what this skill would contain",
@@ -304,7 +306,10 @@ Write the final results to `/tmp/skill-workshop-results.json`:
 
 **Rules for the output:**
 - Sort candidates by score descending
-- Minimum frequency: 3 for explanations/tool_chains, 2 for workarounds
+- `trigger`: exactly one of `user-correction`, `error-resolved`,
+  `nonobvious-workflow`, `recurring-toolchain` (canonical labels — spelled exactly)
+- Minimum frequency: 2 for `recurring-toolchain`/`error-resolved`, 3 for
+  `nonobvious-workflow`; `user-correction` needs only 1 clear instance
 - Include max 15 candidates
 - Evidence: 2-3 examples per candidate, with actual quotes
 - `suggested_name`: kebab-case, descriptive, max 40 chars

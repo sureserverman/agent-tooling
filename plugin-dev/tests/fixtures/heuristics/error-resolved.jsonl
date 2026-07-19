@@ -1,0 +1,7 @@
+{"type":"user","timestamp":"2026-05-03T09:00:00.000Z","message":{"content":"the build keeps failing with a linker error, can you fix it"}}
+{"type":"assistant","timestamp":"2026-05-03T09:00:01.000Z","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"make"}}]}}
+{"type":"tool_result","timestamp":"2026-05-03T09:00:02.000Z","content":"error: undefined reference to foo"}
+{"type":"assistant","timestamp":"2026-05-03T09:00:03.000Z","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"make LDFLAGS=-lfoo"}}]}}
+{"type":"tool_result","timestamp":"2026-05-03T09:00:04.000Z","content":"error: still failing"}
+{"type":"assistant","timestamp":"2026-05-03T09:00:05.000Z","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"make LDFLAGS=-lfoo -L/opt/lib"}}]}}
+{"type":"tool_result","timestamp":"2026-05-03T09:00:06.000Z","content":"build succeeded"}

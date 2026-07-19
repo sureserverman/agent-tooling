@@ -1,0 +1,2 @@
+{"type":"user","timestamp":"2026-05-02T09:00:00.000Z","message":{"content":"deploy the widget service to staging again please"}}
+{"type":"assistant","timestamp":"2026-05-02T09:00:01.000Z","message":{"content":[{"type":"tool_use","name":"Grep","input":{}},{"type":"tool_use","name":"Read","input":{}},{"type":"tool_use","name":"Edit","input":{}},{"type":"tool_use","name":"Bash","input":{}},{"type":"tool_use","name":"Bash","input":{}}]}}
