@@ -32,9 +32,15 @@ Each line is a JSON object with a `type` field. Relevant types:
 ]}}
 ```
 
-**`tool_result`** — tool execution output:
+**`tool_result`** — tool execution output. TWO shapes exist across Claude Code
+versions; handle both (recent sessions use the nested form almost exclusively):
 ```json
+// (1) top-level record
 {"type":"tool_result","toolUseId":"tu_1","content":"file contents or output..."}
+// (2) a block inside a user record's content list (errors flagged is_error)
+{"type":"user","message":{"content":[
+  {"type":"tool_result","tool_use_id":"tu_1","is_error":true,"content":"error: ..."}
+]}}
 ```
 
 **Skip these types entirely:** `file-history-snapshot`, `compact_boundary`, `system`, `summary`.
@@ -165,11 +171,32 @@ for fpath in files[-30:]:
             except:
                 pass
 
+    # A tool result appears in TWO shapes across Claude Code versions:
+    #   (1) a top-level {'type':'tool_result','content': '...'} record, or
+    #   (2) a block inside a {'type':'user'} record's message.content list,
+    #       often flagged {'is_error': true}.
+    # Handle both, or error-resolved silently finds nothing on newer sessions.
+    def error_content(rec):
+        if rec.get('type') == 'tool_result':
+            c = rec.get('content', '')
+            if isinstance(c, str) and any(p in c for p in error_patterns):
+                return c
+        if rec.get('type') == 'user':
+            mc = rec.get('message', {}).get('content')
+            if isinstance(mc, list):
+                for b in mc:
+                    if isinstance(b, dict) and b.get('type') == 'tool_result':
+                        txt = b.get('content', '')
+                        if isinstance(txt, list):
+                            txt = ' '.join(x.get('text','') for x in txt if isinstance(x, dict))
+                        if not isinstance(txt, str): txt = str(txt)
+                        if b.get('is_error') or any(p in txt for p in error_patterns):
+                            return txt
+        return None
+
     for i, rec in enumerate(records):
-        if rec.get('type') != 'tool_result': continue
-        content = rec.get('content', '')
-        if not isinstance(content, str): continue
-        if not any(p in content for p in error_patterns): continue
+        content = error_content(rec)
+        if content is None: continue
 
         # Find the next user message in this session
         sid = rec.get('sessionId', '')
