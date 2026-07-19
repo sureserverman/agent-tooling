@@ -59,6 +59,24 @@ file at the path) and `evalset-unparseable` (not a valid YAML mapping).
 every rubric to be a real list, so an eval set can't ship with unfinished
 rubrics.
 
+## Writing cases that actually discriminate
+
+A skill eval measures the **runner + skill together**, and a capable runner
+supplies a lot from its own priors. So a case that tests *general* competence
+(e.g. "write valid frontmatter", "spot a description leak") will often PASS even
+against a gutted skill — the model already knows how. Such a case can't tell a
+good skill from a bad one.
+
+To measure the skill's *own* contribution, write at least some cases that test
+**skill-specific value the runner cannot supply itself**: a repo-specific
+convention, a non-obvious workflow, an exact required token, a project rule that
+isn't derivable from general knowledge. Those are the cases that drop to a failing
+score when the skill is degraded — the ones that prove the skill is earning its
+place.
+
+Note also that a `criterion` (or `prompt`) containing a `key: value` colon must be
+quoted, or YAML will read it as a nested mapping.
+
 ## Scoring (consumed by skill-eval / skill-judge)
 
 The judge scores each `criterion` 0–5 with evidence; a case's weighted score is
