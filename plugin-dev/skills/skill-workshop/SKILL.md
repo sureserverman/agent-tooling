@@ -57,7 +57,8 @@ rm -f /tmp/sw-*.jsonl /tmp/sw-*.json /tmp/sw-*.txt
 Delegate the extraction and analysis work to the **session-analyzer** subagent.
 Tell it the project path and session directory. It will:
 - Parse all JSONL session files via bash extraction
-- Identify repeated explanations, tool chain patterns, and workaround patterns
+- Classify candidates by the four canonical trigger heuristics (`user-correction`,
+  `error-resolved`, `nonobvious-workflow`, `recurring-toolchain`)
 - Score and rank candidates
 - Write results to `/tmp/skill-workshop-results.json`
 
@@ -125,19 +126,21 @@ For each approved candidate, generate a proper SKILL.md following these practice
    - Include concrete examples from the evidence
    - Keep under 500 lines total
 
-3. **By skill type:**
+3. **By skill type** (`proposed_skill_type`; the candidate's `trigger` suggests
+   which — `nonobvious-workflow` → usually knowledge/workflow, `recurring-toolchain`
+   → workflow, `error-resolved`/`user-correction` → usually gotcha):
 
-   **knowledge** (from repeated_explanation):
+   **knowledge:**
    - State the facts/rules directly
    - Include the exact terminology, values, configs the user kept repeating
    - Add a "Common mistakes" section listing what Claude gets wrong
 
-   **workflow** (from tool_chain):
+   **workflow:**
    - Step-by-step procedure
    - Include the tool sequence as explicit steps
    - Add validation checkpoints between steps
 
-   **gotcha** (from workaround):
+   **gotcha:**
    - Lead with the error pattern (what goes wrong)
    - Then the fix (what to do instead)
    - Make it a concise "DO this, NOT that" format

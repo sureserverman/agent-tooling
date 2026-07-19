@@ -177,10 +177,12 @@ for fpath in files[-30:]:
     #       often flagged {'is_error': true}.
     # Handle both, or error-resolved silently finds nothing on newer sessions.
     def error_content(rec):
+        # -> (error_text, tool_use_id) or (None, None). The id lives in
+        # different places per shape, so return it alongside the text.
         if rec.get('type') == 'tool_result':
             c = rec.get('content', '')
             if isinstance(c, str) and any(p in c for p in error_patterns):
-                return c
+                return c, rec.get('toolUseId', '')
         if rec.get('type') == 'user':
             mc = rec.get('message', {}).get('content')
             if isinstance(mc, list):
@@ -189,13 +191,14 @@ for fpath in files[-30:]:
                         txt = b.get('content', '')
                         if isinstance(txt, list):
                             txt = ' '.join(x.get('text','') for x in txt if isinstance(x, dict))
-                        if not isinstance(txt, str): txt = str(txt)
+                        if not isinstance(txt, str) or not txt:
+                            continue   # skip null/dict/empty content (no junk evidence)
                         if b.get('is_error') or any(p in txt for p in error_patterns):
-                            return txt
-        return None
+                            return txt, b.get('tool_use_id', '')
+        return None, None
 
     for i, rec in enumerate(records):
-        content = error_content(rec)
+        content, tool_use_id = error_content(rec)
         if content is None: continue
 
         # Find the next user message in this session
@@ -213,7 +216,7 @@ for fpath in files[-30:]:
                 's': sid,
                 'error': content[:300],
                 'correction': correction[:300],
-                'tool_use_id': rec.get('toolUseId', '')
+                'tool_use_id': tool_use_id
             })
 
 with open('/tmp/sw-error-corrections.json', 'w') as f:
