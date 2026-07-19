@@ -42,9 +42,10 @@ shared cross-host core of the family. Positioned as the 2026-current alternative
 to Anthropic's existing plugin-dev (~22k lines), with description-leak audit and
 prompt-injection screening baked in.
 
-- **13 skills** — `plugin-structure`, `determinism-boundary`, `skill-development`, `command-development`, `agent-development`, `hook-development` (32 events, five handler types, current to v2.1.170), `mcp-integration`, `mcp-server-development`, `plugin-settings`, `skill-description-leak-audit`, `skill-best-practices-sync`, `creating-subagents` (one definition that works on Claude Code + Codex + Cursor + OpenCode), and `skill-workshop` (session-history mining). Each SKILL.md is ≤500 lines with one-level-deep `references/`.
-- **4 agents** — `plugin-validator` (haiku, runs the deterministic suite then judges), `skill-reviewer` (haiku, leak-audit + injection scan), `agent-creator` (sonnet, write-capable scaffolder), `session-analyzer` (haiku, session mining).
+- **15 skills** — `plugin-structure`, `determinism-boundary`, `skill-development`, `command-development`, `agent-development`, `hook-development` (32 events, five handler types, current to v2.1.170), `mcp-integration`, `mcp-server-development`, `plugin-settings`, `skill-description-leak-audit`, `skill-best-practices-sync`, `creating-subagents` (one definition that works on Claude Code + Codex + Cursor + OpenCode), plus a full **skill lifecycle**: `skill-workshop` (session-history mining), `skill-eval` (rubric-scored effectiveness testing), and `skill-curator` (staleness scan + archive-never-delete maintenance). Each SKILL.md is ≤500 lines with one-level-deep `references/`.
+- **5 agents** — `plugin-validator` (haiku, runs the deterministic suite then judges), `skill-reviewer` (haiku, leak-audit + injection scan), `agent-creator` (sonnet, write-capable scaffolder), `session-analyzer` (haiku, session mining), `skill-judge` (sonnet, rubric-scores a skill-eval case).
 - **`/create-plugin` + `/refactor-plugin`** — scaffold new plugins balanced on the determinism boundary, or retrofit existing ones.
+- **Skill lifecycle** (discover → build → measure → maintain) — see [`plugin-dev/docs/skill-lifecycle.md`](./plugin-dev/docs/skill-lifecycle.md).
 
 Source: [`plugin-dev/`](./plugin-dev)
 
