@@ -30,6 +30,9 @@ The validator agent runs the suite, reports its findings verbatim, then adds onl
 |---|---|
 | `validate-plugin.sh <root> [--json]` | Orchestrator — discovers components, runs each per-domain validator, merges findings, prints one verdict. The single entry point. |
 | `validate-{manifest,skill,command,agent,hooks,mcp,settings}.sh` | Per-domain validators; each emits the shared JSON contract and a human report. |
+| `curator-{inventory,usage,scan}.sh` | Read-only skill-lifecycle scan lane (driven by `skill-curator`): enumerate the estate, extract last-triggered from session history, classify fresh/stale/archive-candidate/pinned/report-only. |
+| `curator-archive.sh` | The only mutating curator script — move-only snapshot / archive / restore (never deletes). |
+| `validate-curator.sh <root>` | Validates the curator's runtime artifacts (`.curator-pins`, `.archive/` layout) on the shared contract; invoked by the skill, not the orchestrator. |
 | `scaffold-{plugin,skill,command,hook}.sh` | Generate valid skeletons (correct frontmatter/layout), idempotent, self-validating. |
 | `lib/findings.sh` | Shared finding accumulator + renderer — the one place the JSON contract lives. |
 
@@ -64,7 +67,7 @@ Structure validation stays plugin-dev's external job; the kit gives a plugin its
 
 ## Components
 
-### Skills (13)
+### Skills (14)
 
 | Skill | Triggers when you ask |
 |---|---|
@@ -81,6 +84,7 @@ Structure validation stays plugin-dev's external job; the kit gives a plugin its
 | `skill-best-practices-sync` | "improve my skills", "sync skills with best practices", "what's new in skill authoring", "refresh skills from Karpathy/community advice" |
 | `creating-subagents` | "create a subagent that works on Claude Code + Codex + Cursor + OpenCode", "scaffold a cross-host agent", "port this agent to other tools" |
 | `skill-workshop` | "what should be a skill", "mine my sessions", "find patterns in my history", "discover skill candidates" — explicit-invocation only (`disable-model-invocation: true`); pairs with the `session-analyzer` agent |
+| `skill-curator` | "curate my skills", "which skills are stale", "clean up my skills", "archive unused skills" — explicit-invocation only; the decay half of the skill lifecycle (staleness scan → keep/patch/consolidate/archive, archive-never-delete); pairs with the `curator-*.sh` scan lane |
 
 ### Agents (4)
 

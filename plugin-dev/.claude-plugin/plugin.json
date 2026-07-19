@@ -19,7 +19,8 @@
     "./skills/skill-description-leak-audit",
     "./skills/skill-best-practices-sync",
     "./skills/creating-subagents",
-    "./skills/skill-workshop"
+    "./skills/skill-workshop",
+    "./skills/skill-curator"
   ],
   "license": "MIT",
   "keywords": [
