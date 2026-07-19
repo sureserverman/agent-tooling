@@ -72,13 +72,27 @@ Read `/tmp/skill-workshop-results.json`. Present to the user:
 - Sessions analyzed (count and date range)
 - Extraction stats (messages, tool calls, errors found)
 
-**Candidates table:**
+**Candidates table.** Each candidate carries a `trigger` — one of the four
+canonical heuristics the session-analyzer assigns (spelled exactly the same in
+`obsidian-wiki:scan-sessions`):
 
-For each candidate (sorted by rank):
+| Trigger | Meaning |
+|---|---|
+| `user-correction` | the user corrected the approach and the fix then worked — strongest signal |
+| `error-resolved` | an error was resolved through trial-and-error |
+| `nonobvious-workflow` | a procedure that needed discovery, not derivation |
+| `recurring-toolchain` | the same 5+ tool sequence repeated across sessions — weakest alone |
+
+Group the candidates by `trigger` and present the groups in that order —
+`user-correction` and `error-resolved` first, because a correction or a hard-won
+fix is stronger evidence of a missing skill than mere repetition. Within a group,
+sort by score.
+
+For each candidate:
 
 ```
-### #{rank}: {suggested_name}
-Type: {signal_type} → proposed skill: {proposed_skill_type}
+### #{rank}: {suggested_name}   [Trigger: {trigger}]
+Proposed skill: {proposed_skill_type}
 Score: {score} | Found in {frequency} sessions
 
 {description}
