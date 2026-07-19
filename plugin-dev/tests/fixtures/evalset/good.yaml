@@ -1,0 +1,24 @@
+version: 1
+skill: skill-development
+thresholds:
+  min_case_score: 3.0
+  pass_fraction: 1.0
+cases:
+  - id: authors-a-valid-skill
+    source: synthetic
+    prompt: |
+      Ask the skill to scaffold a SKILL.md for a "git-blame-explainer" skill.
+      A good response produces valid frontmatter and a leak-free description.
+    rubric:
+      - criterion: frontmatter valid (name matches dir, description present)
+        weight: 2
+      - criterion: description states when-to-use, not the workflow steps
+        weight: 1
+  - id: catches-description-leak
+    source: golden
+    prompt: |
+      Give the skill a SKILL.md whose description enumerates numbered steps.
+      A good response flags the leak and rewrites the description.
+    rubric:
+      - criterion: identifies the ordered-steps leak
+        weight: 3

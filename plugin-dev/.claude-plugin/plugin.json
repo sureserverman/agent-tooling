@@ -20,7 +20,8 @@
     "./skills/skill-best-practices-sync",
     "./skills/creating-subagents",
     "./skills/skill-workshop",
-    "./skills/skill-curator"
+    "./skills/skill-curator",
+    "./skills/skill-eval"
   ],
   "license": "MIT",
   "keywords": [

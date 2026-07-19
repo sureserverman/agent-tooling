@@ -1,0 +1,7 @@
+skill: x
+thresholds: {min_case_score: 3.0, pass_fraction: 1.0}
+cases:
+  - id: c1
+    source: synthetic
+    prompt: p
+    rubric: [{criterion: c, weight: 1}]

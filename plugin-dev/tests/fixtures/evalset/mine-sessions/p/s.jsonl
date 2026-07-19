@@ -1,0 +1,4 @@
+{"type":"user","timestamp":"2026-04-01T10:00:00.000Z","message":{"role":"user","content":"Please scaffold a SKILL.md for a git-blame-explainer skill."}}
+{"type":"assistant","timestamp":"2026-04-01T10:00:03.000Z","message":{"content":[{"type":"text","text":"Sure."},{"type":"tool_use","name":"Skill","input":{"skill":"somens:alpha","args":""}}]}}
+{"type":"user","timestamp":"2026-04-02T11:00:00.000Z","message":{"role":"user","content":[{"type":"text","text":"Now improve my existing skill's description."}]}}
+{"type":"assistant","timestamp":"2026-04-02T11:00:04.000Z","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"alpha"}}]}}
