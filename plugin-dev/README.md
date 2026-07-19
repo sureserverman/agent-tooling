@@ -105,6 +105,25 @@ Structure validation stays plugin-dev's external job; the kit gives a plugin its
 - `/create-plugin` — guided flow: discover intent, **scaffold** structure with `scripts/scaffold-*.sh`, write content via the matching skills, dispatch `agent-creator` for each agent, then gate on `scripts/validate-plugin.sh` before a semantic `plugin-validator` pass. Vendors the determinism kit into the new plugin. Discovery asks three paradigm questions — does the plugin persist an artifact (→ schema + scanner + fixtures), can a skill's effort vary ~10x (→ depth tiers), does a skill do heavy non-interactive evidence-gathering (→ extract it as an agent) — each with a clean skip for the common "no".
 - `/refactor-plugin` — make an existing plugin balanced: survey each action into the three lanes (mechanical / judgment-interactive / judgment-batch-isolated), vendor the kit, generate its domain validators, add schema + scanner + fixtures for any persisted artifact and depth tiers for any elastic skill, and rewire its agents/commands — carving batch judgment into agents only on a concrete benefit.
 
+## The skill lifecycle
+
+Beyond authoring a skill, plugin-dev covers its whole life — **discover → build →
+measure → maintain**:
+
+- **Discover** — `skill-workshop` (+ `session-analyzer`) mines your session
+  history for skill candidates, classified by four trigger heuristics
+  (`user-correction`, `error-resolved`, `nonobvious-workflow`,
+  `recurring-toolchain`).
+- **Build** — `skill-development`.
+- **Measure** — `skill-eval` (+ `skill-judge`) runs a skill against rubric-scored
+  eval cases with a separate judge and hard gates, and gates rewrites against a
+  baseline so an edit can't silently regress.
+- **Maintain** — `skill-curator` finds stale/unused skills and keeps/patches/
+  consolidates/archives them, archive-never-delete, with snapshots and pinning.
+
+`skill-curator`, `skill-eval`, and `skill-workshop` are explicit-invocation only.
+**Full guide: [`docs/skill-lifecycle.md`](./docs/skill-lifecycle.md).**
+
 ## Anti-patterns this plugin will catch
 
 - Components placed inside `.claude-plugin/` (only `plugin.json` belongs there).
