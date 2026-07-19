@@ -105,7 +105,7 @@ case "$CMD" in
       [ $base[] | .case_id as $id | {
           case_id:$id,
           baseline:.weighted_total,
-          candidate: (($cand[] | select(.case_id==$id) | .weighted_total) // null)
+          candidate: (([$cand[] | select(.case_id==$id) | .weighted_total] | first) // null)
         } | .regressed = ((.candidate // -1) < .baseline) ] as $rows
       | {accepted: ($rows | all(.regressed|not)),
          regressions: ($rows | map(select(.regressed)))}')
