@@ -39,6 +39,9 @@ cases:                          # required, non-empty
 | `cases[].prompt` | non-empty | `evalset-case-no-prompt` |
 | `cases[].rubric` | non-empty list of `{criterion, weight:number}` | `evalset-case-bad-rubric` |
 
+Two operational findings are emitted before field checks: `evalset-missing` (no
+file at the path) and `evalset-unparseable` (not a valid YAML mapping).
+
 ## Sources
 
 - **synthetic** — authored by hand (or by the skill-eval author) to probe a
