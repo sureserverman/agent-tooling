@@ -29,6 +29,12 @@ EMPTY=$(bash "$S/curator-usage.sh" --sessions /nonexistent-sessions-dir --json a
 check "empty history -> history_present false" '.history_present==false' "$EMPTY"
 
 echo "curator-scan:"
+# mtimefb tests the mtime fallback (no session usage), so its age depends on the
+# file's mtime — which git does NOT preserve across checkout. Pin it here to 100
+# days before the fixed --now (1789000000 - 100*86400) so the test is
+# deterministic regardless of when the tree was checked out.
+touch -d "@1780360000" "$FX/scan/estate/skills/mtimefb/SKILL.md" 2>/dev/null \
+  || touch -t "$(date -u -d @1780360000 +%Y%m%d%H%M.%S 2>/dev/null || date -u -r 1780360000 +%Y%m%d%H%M.%S)" "$FX/scan/estate/skills/mtimefb/SKILL.md"
 SC=$(bash "$S/curator-scan.sh" "$FX/scan/estate" --sessions "$FX/scan/sessions" --pins "$FX/scan/pins" --now 1789000000 --json)
 check "45d unused -> stale"                '(.skills[]|select(.name=="stale45").state)=="stale"' "$SC"
 check "100d unused -> archive-candidate"   '(.skills[]|select(.name=="arch100").state)=="archive-candidate"' "$SC"
