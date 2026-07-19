@@ -1,0 +1,2 @@
+{"type":"user","timestamp":"2026-05-05T09:00:00.000Z","message":{"content":"remember: to regen the onion address you must stop tor, delete the hs_ed25519 keys, then restart and wait 60 seconds for the new hostname file"}}
+{"type":"assistant","timestamp":"2026-05-05T09:00:01.000Z","message":{"content":[{"type":"tool_use","name":"Bash","input":{}}]}}

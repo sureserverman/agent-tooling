@@ -1,0 +1,5 @@
+{"type":"user","timestamp":"2026-05-04T09:00:00.000Z","message":{"content":"add the config to settings.json"}}
+{"type":"assistant","timestamp":"2026-05-04T09:00:01.000Z","message":{"content":[{"type":"tool_use","name":"Edit","input":{"file_path":"settings.json"}}]}}
+{"type":"user","timestamp":"2026-05-04T09:00:02.000Z","message":{"content":"no, that's wrong — it must go in settings.local.json, never the shared settings.json"}}
+{"type":"assistant","timestamp":"2026-05-04T09:00:03.000Z","message":{"content":[{"type":"tool_use","name":"Edit","input":{"file_path":"settings.local.json"}}]}}
+{"type":"user","timestamp":"2026-05-04T09:00:04.000Z","message":{"content":"perfect, thanks"}}
