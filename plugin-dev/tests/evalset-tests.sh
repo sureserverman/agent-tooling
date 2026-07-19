@@ -31,6 +31,20 @@ ND=$(bash "$S/validate-evalset.sh" /tmp/evalset-mined.yaml --json 2>/dev/null ||
 check "mined draft rejected without --draft" '.summary.errors>=1' "$ND"
 if bash "$S/evalset-mine.sh" neverfired --sessions "$FX/mine-sessions" >/dev/null 2>&1; then bad "no-usage skill -> nonzero"; else ok "no-usage skill -> nonzero"; fi
 
+echo "skill-eval-gate (precheck/verdict/compare):"
+PC=$(bash "$S/skill-eval-gate.sh" precheck "$FX/skilldir-good" "$FX/skilldir-good/evals/cases.yaml" --json 2>/dev/null)
+check "good skill precheck passes" '.summary.errors==0' "$PC"
+BG=$(bash "$S/skill-eval-gate.sh" precheck "$FX/skilldir-big" "$FX/skilldir-good/evals/cases.yaml" --json 2>/dev/null || true)
+check "16KB skill rejected pre-dispatch" 'any(.findings[]; .rule=="evalgate-skill-too-big")' "$BG"
+VP=$(bash "$S/skill-eval-gate.sh" verdict "$FX/skilldir-good/evals/cases.yaml" "$FX/scores-pass.json" 2>/dev/null)
+check "passing scores -> PASS" '.verdict=="PASS" and (.failed|length==0)' "$VP"
+VF=$(bash "$S/skill-eval-gate.sh" verdict "$FX/skilldir-good/evals/cases.yaml" "$FX/scores-fail.json" 2>/dev/null || true)
+check "sabotaged scores -> FAIL names case" '.verdict=="FAIL" and (.failed|index("catches-description-leak")!=null)' "$VF"
+CR=$(bash "$S/skill-eval-gate.sh" compare "$FX/scores-baseline.json" "$FX/scores-regress.json" 2>/dev/null || true)
+check "regressing rewrite rejected" '.accepted==false and (.regressions[0].case_id=="catches-description-leak")' "$CR"
+CI=$(bash "$S/skill-eval-gate.sh" compare "$FX/scores-baseline.json" "$FX/scores-improve.json" 2>/dev/null)
+check "improving rewrite accepted" '.accepted==true and (.regressions|length==0)' "$CI"
+
 echo
 echo "evalset-tests: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

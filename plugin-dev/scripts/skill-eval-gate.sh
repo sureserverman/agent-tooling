@@ -90,6 +90,25 @@ case "$CMD" in
     [ "$(printf '%s' "$RESULT" | jq -r '.verdict')" = PASS ]
     ;;
 
+  compare)
+    # compare <baseline-scores.json> <candidate-scores.json>
+    # Accept a rewrite iff its weighted_total holds or beats the baseline for
+    # EVERY case the baseline scored. A single per-case regression rejects it.
+    BASE="${1:-}"; CAND="${2:-}"
+    [ -n "$BASE" ] && [ -n "$CAND" ] || { echo "usage: $0 compare <baseline.json> <candidate.json>" >&2; exit 2; }
+    B=$(cat "$BASE"); C=$(cat "$CAND")
+    RESULT=$(jq -n --argjson base "$B" --argjson cand "$C" '
+      [ $base[] | .case_id as $id | {
+          case_id:$id,
+          baseline:.weighted_total,
+          candidate: (($cand[] | select(.case_id==$id) | .weighted_total) // null)
+        } | .regressed = ((.candidate // -1) < .baseline) ] as $rows
+      | {accepted: ($rows | all(.regressed|not)),
+         regressions: ($rows | map(select(.regressed)))}')
+    echo "$RESULT"
+    [ "$(printf '%s' "$RESULT" | jq -r '.accepted')" = true ]
+    ;;
+
   *)
-    echo "usage: $0 <precheck|verdict> ..." >&2; exit 2 ;;
+    echo "usage: $0 <precheck|verdict|compare> ..." >&2; exit 2 ;;
 esac
